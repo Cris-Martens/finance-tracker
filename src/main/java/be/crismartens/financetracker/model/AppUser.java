@@ -3,7 +3,6 @@ package be.crismartens.financetracker.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "app_users")
 public class AppUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

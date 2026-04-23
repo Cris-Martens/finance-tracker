@@ -5,10 +5,13 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/finance
-    username: user
+    username: root
     password: tytRib-myksy7-rupmog
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-
-
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
