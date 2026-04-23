@@ -5,7 +5,7 @@ import be.crismartens.financetracker.repository.UserRepository;
 import be.crismartens.financetracker.response.UserRespones;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
+    private final UserDetailsService userDetailsService;
 
     @Autowired
-    public UserController(UserRepository userRepository, PasswordEncoder encoder) {
+    public UserController(UserRepository userRepository, PasswordEncoder encoder, UserDetailsService userDetailsService) {
         this.userRepository = userRepository;
         this.encoder = encoder;
+        this.userDetailsService = userDetailsService;
     }
 
     @PostMapping(path = "/register")
@@ -34,6 +36,6 @@ public class UserController {
         return ResponseEntity.ok(new UserRespones("User added!", user.getUsername()));
     }
 
-    record RegistrationRequest(String username, String email, String password) {
-    }
+    record LoginRequest(String username, String password) {}
+    record RegistrationRequest(String username, String email, String password) {}
 }
