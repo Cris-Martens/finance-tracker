@@ -2,11 +2,11 @@ package be.crismartens.financetracker.response;
 
 import org.springframework.context.annotation.Bean;
 
-public class UserRespones {
+public class UserResponse {
     private String message;
     private String username;
 
-    public UserRespones(String message, String username) {
+    public UserResponse(String message, String username) {
         this.message = message;
         this.username = username;
     }

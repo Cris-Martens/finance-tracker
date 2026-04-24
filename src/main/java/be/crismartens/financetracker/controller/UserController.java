@@ -2,7 +2,7 @@ package be.crismartens.financetracker.controller;
 
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.UserRepository;
-import be.crismartens.financetracker.response.UserRespones;
+import be.crismartens.financetracker.response.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,7 +24,7 @@ public class UserController {
     }
 
     @PostMapping(path = "/register")
-    public ResponseEntity<UserRespones> registerUser(@RequestBody RegistrationRequest request) {
+    public ResponseEntity<UserResponse> registerUser(@RequestBody RegistrationRequest request) {
         var user = new AppUser();
         user.setUsername(request.username());
         user.setEmail(request.email());
@@ -33,7 +33,7 @@ public class UserController {
 
         userRepository.save(user);
 
-        return ResponseEntity.ok(new UserRespones("User added!", user.getUsername()));
+        return ResponseEntity.ok(new UserResponse("User added!", user.getUsername()));
     }
 
     record RegistrationRequest(String username, String email, String password) {}
