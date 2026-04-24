@@ -5,8 +5,10 @@ import be.crismartens.financetracker.model.Expense;
 import be.crismartens.financetracker.repository.ExpensesRepository;
 import be.crismartens.financetracker.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,8 +22,12 @@ public class ExpensesService {
         this.userRepository = userRepository;
     }
 
-    public List<Expense> getExpensesByUserId(Long user_id) {
-        return expensesRepository.findAllExpensesByUserId(user_id);
+    public List<Expense> getExpensesByUserId(UserDetails user) throws UsernameNotFoundException {
+        Optional<AppUser> appUser = userRepository.findByUsername(user.getUsername());
+        if(appUser.isPresent()) {
+            return expensesRepository.findAllExpensesByUserId(appUser.get().getId());
+        }
+        return new ArrayList<>();
     }
 
     public void addExpense(Expense expense, UserDetails principal) {
