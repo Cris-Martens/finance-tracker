@@ -1,4 +1,4 @@
-package be.crismartens.financetracker.model;
+package be.crismartens.financetracker.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -12,6 +12,8 @@ public class mvcConfig implements WebMvcConfigurer {
         registry.addViewController("/").setViewName("home");
         registry.addViewController("/home").setViewName("home");
         registry.addViewController("/hello").setViewName("hello");
+        registry.addViewController("/api/v1/register").setViewName("register");
         registry.addViewController("/login").setViewName("login");
+        registry.addViewController("/api/v1/user/expenses").setViewName("home");
     }
 }
