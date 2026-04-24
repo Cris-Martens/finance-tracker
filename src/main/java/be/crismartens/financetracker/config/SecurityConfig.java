@@ -3,7 +3,6 @@ package be.crismartens.financetracker.config;
 import be.crismartens.financetracker.controller.MyUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -32,7 +31,7 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/", "/home", "/api/v1/register", "/register").permitAll()
-                        .requestMatchers("/api/v1/user/**").hasAuthority("ROLE_USER")
+                        .requestMatchers("/api/v1/user/**", "/user/**").hasAuthority("ROLE_USER")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults()) // Adds basic authentication headers to every post
@@ -56,11 +55,6 @@ public class SecurityConfig {
         return myUserDetailService;
     }
 
-    /**
-     * Configures the AuthenticationProvider
-     *
-     * @return the configured AuthenticationProvider
-     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider(myUserDetailService);
