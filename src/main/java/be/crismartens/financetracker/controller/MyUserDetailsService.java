@@ -20,13 +20,6 @@ public class MyUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Loads the user by username
-     *
-     * @param username is the username to search for
-     * @return the UserDetails object
-     * @throws UsernameNotFoundException if the user is not found
-     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<AppUser> myUserOptional = userRepository.findByUsername(username);
@@ -35,7 +28,7 @@ public class MyUserDetailsService implements UserDetailsService {
             return User.builder()
                     .username(myUser.getUsername())
                     .password(myUser.getPassword())
-                    .roles(myUser.getAuthority().split(","))
+                    .authorities(myUser.getAuthority().split(","))
                     .build();
         } else {
             throw new UsernameNotFoundException(username + "not found");

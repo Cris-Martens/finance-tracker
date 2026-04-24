@@ -36,6 +36,5 @@ public class UserController {
         return ResponseEntity.ok(new UserRespones("User added!", user.getUsername()));
     }
 
-    record LoginRequest(String username, String password) {}
     record RegistrationRequest(String username, String email, String password) {}
 }

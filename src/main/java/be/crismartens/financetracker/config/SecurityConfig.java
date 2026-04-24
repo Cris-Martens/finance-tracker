@@ -34,6 +34,7 @@ public class SecurityConfig {
                 )
                 .formLogin((form) -> form
                         .loginPage("/login")
+                        .defaultSuccessUrl("/hello")
                         .permitAll()
                 )
                 .logout(LogoutConfigurer::permitAll);
