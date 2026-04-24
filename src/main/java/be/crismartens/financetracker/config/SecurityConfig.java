@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/", "/home", "/api/v1/register", "/register").permitAll()
-                        .requestMatchers( HttpMethod.POST,"/api/v1/user/**").hasAuthority("ROLE_USER")
+                        .requestMatchers("/api/v1/user/**").hasAuthority("ROLE_USER")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults()) // Adds basic authentication headers to every post
