@@ -1,12 +1,16 @@
 package be.crismartens.financetracker.repository;
 
 import be.crismartens.financetracker.model.Expense;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ExpensesRepository extends CrudRepository<Expense, Long> {
-    List<Expense> findAllExpensesByAppUserId(Long userId);
+    // @Query("select e from Expense e join fetch e.category where e.appUser.id = :userId")
+    List<Expense> findExpensesByAppUserId( //@Param("user_id")
+                                                                                 Long userId);
     Optional<Expense> findByIdAndAppUserUsername(Long Id, String username);
 }

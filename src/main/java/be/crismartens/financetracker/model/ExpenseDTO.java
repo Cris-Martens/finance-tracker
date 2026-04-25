@@ -6,8 +6,8 @@ import java.time.LocalDate;
 
 public class ExpenseDTO {
     private Long id;
-    @JsonProperty("category_id")
-    private int categoryId;
+    @JsonProperty("category")
+    private Category category;
     @JsonProperty("expense_date")
     LocalDate expenseDate;
     private double amount;
@@ -17,7 +17,7 @@ public class ExpenseDTO {
 
     public ExpenseDTO(Expense expense) {
         this.id = expense.getId();
-        this.categoryId = expense.getCategoryId();
+        this.category = expense.getCategory();
         this.expenseDate = expense.getExpenseDate();
         this.amount = expense.getAmount();
         this.description = expense.getDescription();
@@ -31,12 +31,12 @@ public class ExpenseDTO {
         this.id = id;
     }
 
-    public int getCategoryId() {
-        return categoryId;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public LocalDate getExpenseDate() {

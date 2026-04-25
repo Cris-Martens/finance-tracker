@@ -2,13 +2,16 @@ package be.crismartens.financetracker.service;
 
 import be.crismartens.financetracker.ExpenseNotFoundException;
 import be.crismartens.financetracker.model.AppUser;
+import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.Expense;
 import be.crismartens.financetracker.model.ExpenseDTO;
+import be.crismartens.financetracker.repository.CategoryRepository;
 import be.crismartens.financetracker.repository.ExpensesRepository;
 import be.crismartens.financetracker.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,19 +22,24 @@ import java.util.Optional;
 public class ExpensesService {
     private final ExpensesRepository expensesRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
-    public ExpensesService(ExpensesRepository expensesRepository,  UserRepository userRepository) {
+    public ExpensesService(ExpensesRepository expensesRepository,  UserRepository userRepository,
+                           CategoryRepository categoryRepository) {
         this.expensesRepository = expensesRepository;
         this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
     }
 
+    @Transactional
     public List<ExpenseDTO> getExpensesByAppUserId(UserDetails user) throws UsernameNotFoundException {
         Optional<Long> userId = userRepository.findIdByUsername(user.getUsername());
         System.out.println("Attempt to use userId");
         if  (userId.isPresent()) {
-            List<Expense> expenses = expensesRepository.findAllExpensesByAppUserId(userId.get());
             List<ExpenseDTO> expensesDTO = new ArrayList<>();
-            for (Expense expense : expenses) {
+            List<Expense> expenses = expensesRepository.
+                    findExpensesByAppUserId(userId.get());
+            for (Expense expense: expenses) {
                 expensesDTO.add(new ExpenseDTO(expense));
             }
             return expensesDTO;
@@ -63,13 +71,14 @@ public class ExpensesService {
 
     public void updateExpense(Expense expense, UserDetails principal) throws ExpenseNotFoundException, UsernameNotFoundException {
         Optional<Long> userId = userRepository.findIdByUsername(principal.getUsername());
+        Optional<Category> category = categoryRepository.findByName(expense.getCategory().getName());
         if (userId.isEmpty()) {
             throw new UsernameNotFoundException("User: " + principal.getUsername() + " not found");
         }
         Expense updateExpense = expensesRepository.findById(expense.getId()).get();
         if (userId.get().equals(updateExpense.getAppUser().getId())) {
             updateExpense.setExpenseDate(expense.getExpenseDate());
-            updateExpense.setCategoryId(expense.getCategoryId());
+            updateExpense.setCategory(category.get());
             updateExpense.setAmount(expense.getAmount());
             updateExpense.setDescription(expense.getDescription());
             updateExpense.setAppUser(userRepository.findByUsername(principal.getUsername()).get());
