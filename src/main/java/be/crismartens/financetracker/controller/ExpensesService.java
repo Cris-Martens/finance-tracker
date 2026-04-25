@@ -31,6 +31,17 @@ public class ExpensesService {
         return new ArrayList<>();
     }
 
+    public Optional<Expense> getExpenseById(long id, UserDetails user) {
+        Optional<Expense> expense = expensesRepository.findById(id);
+        Optional<AppUser> appUser = userRepository.findByUsername(user.getUsername());
+        if (expense.isPresent() &&
+                appUser.isPresent() &&
+                expense.get().getUserId().equals(appUser.get().getId())) {
+            return expense;
+        }
+        return Optional.empty();
+    }
+
     public void addExpense(Expense expense, UserDetails principal) {
         Optional<AppUser> user = userRepository.findByUsername(principal.getUsername());
         user.ifPresent(appUser -> expense.setUserId(appUser.getId()));

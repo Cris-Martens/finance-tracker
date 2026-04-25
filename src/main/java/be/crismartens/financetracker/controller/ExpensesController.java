@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -22,6 +23,11 @@ public class ExpensesController {
     @GetMapping("/user/expenses")
     public List<Expense> getExpenses(@AuthenticationPrincipal UserDetails user) {
         return expensesService.getExpensesByUserId(user);
+    }
+
+    @GetMapping("/user/expenses/{id}")
+    public Optional<Expense> getExpenseById(@PathVariable long id, @AuthenticationPrincipal UserDetails user) {
+        return expensesService.getExpenseById(id, user);
     }
 
     @PostMapping("/user/expenses")
