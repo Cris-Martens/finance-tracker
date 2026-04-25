@@ -54,6 +54,7 @@ public class ExpensesService {
         if (user.isPresent()) {
             Expense updateExpense = expensesRepository.findById(expense.getId()).get();
             if (updateExpense.getUserId().equals(user.get().getId())) {
+                updateExpense.setExpenseDate(expense.getExpenseDate());
                 updateExpense.setCategoryId(expense.getCategoryId());
                 updateExpense.setAmount(expense.getAmount());
                 updateExpense.setDescription(expense.getDescription());

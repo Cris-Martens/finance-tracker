@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import org.springframework.boot.jackson.JacksonComponent;
 import org.springframework.context.annotation.Bean;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "expenses")
 public class Expense {
@@ -13,6 +15,8 @@ public class Expense {
     private Long id;
     @JsonProperty("user_id")
     private Long userId;
+    @JsonProperty("expense_date")
+    private LocalDate expenseDate;
     @JsonProperty("category_id")
     private int categoryId;
     private double amount;
@@ -20,8 +24,9 @@ public class Expense {
 
     public Expense() {}
 
-    public Expense(Long userId, Integer categoryId, double amount, String description) {
+    public Expense(Long userId, LocalDate expenseDate, Integer categoryId, double amount, String description) {
         this.userId = userId;
+        this.expenseDate = expenseDate;
         this.categoryId = categoryId;
         this.amount = amount;
         this.description = description;
@@ -41,6 +46,14 @@ public class Expense {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public LocalDate getExpenseDate() {
+        return expenseDate;
+    }
+
+    public void setExpenseDate(LocalDate expenseDate) {
+        this.expenseDate = expenseDate;
     }
 
     public int getCategoryId() {
