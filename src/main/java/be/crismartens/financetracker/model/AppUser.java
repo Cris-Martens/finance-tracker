@@ -2,6 +2,8 @@ package be.crismartens.financetracker.model;
 
 import jakarta.persistence.*;
 
+import java.util.Set;
+
 @Entity
 public class AppUser {
     @Id
@@ -11,6 +13,9 @@ public class AppUser {
     private String email;
     private String password;
     private String authority;
+
+    @OneToMany(mappedBy = "appUser")
+    private Set<Expense> expenses;
 
     public AppUser() {}
 

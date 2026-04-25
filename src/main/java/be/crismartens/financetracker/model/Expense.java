@@ -1,9 +1,8 @@
 package be.crismartens.financetracker.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
-import org.springframework.boot.jackson.JacksonComponent;
-import org.springframework.context.annotation.Bean;
 
 import java.time.LocalDate;
 
@@ -13,19 +12,24 @@ public class Expense {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @JsonProperty("user_id")
-    private Long userId;
+
+    @Nonnull
     @JsonProperty("expense_date")
     private LocalDate expenseDate;
     @JsonProperty("category_id")
     private int categoryId;
-    private double amount;
+    @Nonnull
+    private Double amount;
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private AppUser appUser;
 
     public Expense() {}
 
-    public Expense(Long userId, LocalDate expenseDate, Integer categoryId, double amount, String description) {
-        this.userId = userId;
+    public Expense(@Nonnull LocalDate expenseDate,
+                   int categoryId, @Nonnull Double amount, String description) {
         this.expenseDate = expenseDate;
         this.categoryId = categoryId;
         this.amount = amount;
@@ -40,14 +44,6 @@ public class Expense {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
     public LocalDate getExpenseDate() {
         return expenseDate;
     }
@@ -56,7 +52,7 @@ public class Expense {
         this.expenseDate = expenseDate;
     }
 
-    public int getCategoryId() {
+    public Integer getCategoryId() {
         return categoryId;
     }
 
@@ -64,7 +60,7 @@ public class Expense {
         this.categoryId = categoryId;
     }
 
-    public double getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
@@ -79,4 +75,13 @@ public class Expense {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public AppUser getAppUser() {
+        return appUser;
+    }
+
+    public void setAppUser(AppUser appUser) {
+        this.appUser = appUser;
+    }
 }
+

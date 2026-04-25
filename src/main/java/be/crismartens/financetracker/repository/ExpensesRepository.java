@@ -6,5 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface ExpensesRepository extends CrudRepository<Expense, Long> {
-    public List<Expense> findAllExpensesByUserId(long userId);
+    public List<Expense> findAllExpensesByAppUserId(long userId);
 }
