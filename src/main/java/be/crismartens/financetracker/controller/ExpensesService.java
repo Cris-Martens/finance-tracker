@@ -4,7 +4,6 @@ import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.model.Expense;
 import be.crismartens.financetracker.repository.ExpensesRepository;
 import be.crismartens.financetracker.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ public class ExpensesService {
     public List<Expense> getExpensesByUserId(UserDetails user) throws UsernameNotFoundException {
         Optional<AppUser> appUser = userRepository.findByUsername(user.getUsername());
         if(appUser.isPresent()) {
-            return expensesRepository.findAllExpensesByUserId(appUser.get().getId());
+            return expensesRepository.findAllExpensesByAppUserId(appUser.get().getId());
         }
         return new ArrayList<>();
     }
@@ -36,7 +35,7 @@ public class ExpensesService {
         Optional<AppUser> appUser = userRepository.findByUsername(user.getUsername());
         if (expense.isPresent() &&
                 appUser.isPresent() &&
-                expense.get().getUserId().equals(appUser.get().getId())) {
+                expense.get().getAppUser().getId() == (appUser.get().getId())) {
             return expense;
         }
         return Optional.empty();
@@ -44,7 +43,7 @@ public class ExpensesService {
 
     public void addExpense(Expense expense, UserDetails principal) {
         Optional<AppUser> user = userRepository.findByUsername(principal.getUsername());
-        user.ifPresent(appUser -> expense.setUserId(appUser.getId()));
+        user.ifPresent(expense::setAppUser);
 
         expensesRepository.save(expense);
     }
@@ -53,7 +52,8 @@ public class ExpensesService {
         Optional<AppUser> user = userRepository.findByUsername(principal.getUsername());
         if (user.isPresent()) {
             Expense updateExpense = expensesRepository.findById(expense.getId()).get();
-            if (updateExpense.getUserId().equals(user.get().getId())) {
+            if (updateExpense.getAppUser().getId() == user.get().getId()) {
+                updateExpense.setExpenseDate(expense.getExpenseDate());
                 updateExpense.setCategoryId(expense.getCategoryId());
                 updateExpense.setAmount(expense.getAmount());
                 updateExpense.setDescription(expense.getDescription());
@@ -67,7 +67,7 @@ public class ExpensesService {
         Optional<AppUser> user = userRepository.findByUsername(principal.getUsername());
         if (user.isPresent()) {
             Expense deleteExpense = expensesRepository.findById(expense.getId()).get();
-            if (deleteExpense.getUserId().equals(user.get().getId())) {
+            if (deleteExpense.getAppUser().getId() == (user.get().getId())) {
                 expensesRepository.delete(deleteExpense);
             }
 
