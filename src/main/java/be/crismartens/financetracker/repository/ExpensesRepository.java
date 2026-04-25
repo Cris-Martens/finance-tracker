@@ -4,7 +4,9 @@ import be.crismartens.financetracker.model.Expense;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ExpensesRepository extends CrudRepository<Expense, Long> {
-    public List<Expense> findAllExpensesByAppUserId(long userId);
+    List<Expense> findAllExpensesByAppUserId(Long userId);
+    Optional<Expense> findByIdAndAppUserUsername(Long Id, String username);
 }

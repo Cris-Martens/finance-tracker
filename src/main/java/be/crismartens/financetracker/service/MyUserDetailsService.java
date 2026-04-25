@@ -1,4 +1,4 @@
-package be.crismartens.financetracker.controller;
+package be.crismartens.financetracker.service;
 
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.UserRepository;
