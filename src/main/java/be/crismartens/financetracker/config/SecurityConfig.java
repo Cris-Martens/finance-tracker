@@ -1,6 +1,6 @@
 package be.crismartens.financetracker.config;
 
-import be.crismartens.financetracker.controller.MyUserDetailsService;
+import be.crismartens.financetracker.service.MyUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;

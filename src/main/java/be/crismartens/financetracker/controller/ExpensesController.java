@@ -1,6 +1,8 @@
 package be.crismartens.financetracker.controller;
 
 import be.crismartens.financetracker.model.Expense;
+import be.crismartens.financetracker.model.ExpenseDTO;
+import be.crismartens.financetracker.service.ExpensesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,12 +23,12 @@ public class ExpensesController {
     }
 
     @GetMapping("/user/expenses")
-    public List<Expense> getExpenses(@AuthenticationPrincipal UserDetails user) {
-        return expensesService.getExpensesByUserId(user);
+    public List<ExpenseDTO> getExpenses(@AuthenticationPrincipal UserDetails user) {
+        return expensesService.getExpensesByAppUserId(user);
     }
 
     @GetMapping("/user/expenses/{id}")
-    public Optional<Expense> getExpenseById(@PathVariable long id, @AuthenticationPrincipal UserDetails user) {
+    public ExpenseDTO getExpenseById(@PathVariable long id, @AuthenticationPrincipal UserDetails user) {
         return expensesService.getExpenseById(id, user);
     }
 
