@@ -13,25 +13,27 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Nonnull
+    @Column(nullable = false)
     @JsonProperty("expense_date")
     private LocalDate expenseDate;
-    @JsonProperty("category_id")
-    private int categoryId;
-    @Nonnull
+    @Column(nullable = false)
     private Double amount;
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private AppUser appUser;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
     public Expense() {}
 
-    public Expense(@Nonnull LocalDate expenseDate,
-                   int categoryId, @Nonnull Double amount, String description) {
+    public Expense(@Nonnull LocalDate expenseDate, Category category,
+                   @Nonnull Double amount, String description) {
         this.expenseDate = expenseDate;
-        this.categoryId = categoryId;
+        this.category = category;
         this.amount = amount;
         this.description = description;
     }
@@ -52,19 +54,19 @@ public class Expense {
         this.expenseDate = expenseDate;
     }
 
-    public Integer getCategoryId() {
-        return categoryId;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 
