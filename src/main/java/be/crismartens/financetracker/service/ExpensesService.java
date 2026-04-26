@@ -1,5 +1,6 @@
 package be.crismartens.financetracker.service;
 
+import be.crismartens.financetracker.CategoryNotFoundException;
 import be.crismartens.financetracker.ExpenseNotFoundException;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.model.Category;
@@ -72,6 +73,9 @@ public class ExpensesService {
     public void updateExpense(Expense expense, UserDetails principal) throws ExpenseNotFoundException, UsernameNotFoundException {
         Optional<Long> userId = userRepository.findIdByUsername(principal.getUsername());
         Optional<Category> category = categoryRepository.findByName(expense.getCategory().getName());
+        if (category.isEmpty()) {
+            throw new CategoryNotFoundException(expense.getCategory().getName() + "not found.");
+        }
         if (userId.isEmpty()) {
             throw new UsernameNotFoundException("User: " + principal.getUsername() + " not found");
         }
