@@ -1,0 +1,14 @@
+CREATE TABLE budget
+(
+    id            BIGINT AUTO_INCREMENT NOT NULL,
+    user_id       BIGINT NOT NULL,
+    amount        DOUBLE NOT NULL,
+    category_id   BIGINT NOT NULL,
+    CONSTRAINT PK_BUDGET PRIMARY KEY (id)
+);
+
+ALTER TABLE budget
+    ADD CONSTRAINT FK_BUDGET_ON_CATEGORY FOREIGN KEY (category_id) REFERENCES category (id);
+
+ALTER TABLE budget
+    ADD CONSTRAINT FK_BUDGET_ON_USER FOREIGN KEY (user_id) REFERENCES app_user (id);

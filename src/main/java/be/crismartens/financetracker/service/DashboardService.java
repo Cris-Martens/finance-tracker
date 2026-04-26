@@ -4,6 +4,7 @@ import be.crismartens.financetracker.model.ExpenseDTO;
 import be.crismartens.financetracker.repository.CategoryRepository;
 import be.crismartens.financetracker.repository.ExpensesRepository;
 import be.crismartens.financetracker.repository.UserRepository;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
