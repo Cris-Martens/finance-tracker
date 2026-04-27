@@ -4,7 +4,6 @@ import be.crismartens.financetracker.CategoryNotFoundException;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.CategoryBudget;
-import be.crismartens.financetracker.model.CategoryBudgetDTO;
 import be.crismartens.financetracker.repository.BudgetRepository;
 import be.crismartens.financetracker.repository.CategoryRepository;
 import be.crismartens.financetracker.repository.UserRepository;
@@ -40,9 +39,7 @@ public class BudgetService {
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
         for (String key : budgets.keySet()) {
-            System.out.println("Saving budget: " + key);
             if (budgets.get(key) > 0) {
-                System.out.println(key + " - " + budgets.get(key));
                 CategoryBudget budget = new CategoryBudget();
                 Category category = categoryRepository.findByName(key)
                         .orElseThrow(() -> new CategoryNotFoundException("category not found"));
@@ -51,7 +48,6 @@ public class BudgetService {
                 budget.setAppUser(user);
 
                 budgetRepository.save(budget);
-                System.out.println("Success!");
             }
         }
     }
@@ -65,5 +61,32 @@ public class BudgetService {
             budgetsMap.put(budget.getCategory().getName(), budget.getAmount());
         }
         return budgetsMap;
+    }
+
+    public void updateBudgets(UserDetails principal, Map<String, Double> budgets) {
+        Long userId = userRepository.findIdByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        for (String key : budgets.keySet()) {
+            Long categoryId = categoryRepository.findIdByName(key);
+            CategoryBudget budget = budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(userId, categoryId);
+            budget.setAmount(budgets.get(key));
+            budgetRepository.save(budget);
+        }
+    }
+
+    public void deleteBudgets(UserDetails principal, String category) {
+        System.out.println("Deleting budgets");
+        Long userId = userRepository.findIdByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        System.out.println(userId);
+        Long categoryId = categoryRepository.findIdByName(category);
+        System.out.println(categoryId);
+        if (categoryId != null) {
+            CategoryBudget budget = budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(userId, categoryId);
+            if (budget != null) {
+                System.out.println(budget.getAmount());
+                budgetRepository.delete(budget);
+            }
+        }
     }
 }

@@ -23,8 +23,7 @@ public class AppUser {
 
     public AppUser() {}
 
-    public AppUser(Long id, String username, String email, String password, String authority) {
-        this.id = id;
+    public AppUser(String username, String email, String password, String authority) {
         this.username = username;
         this.email = email;
         this.password = password;
