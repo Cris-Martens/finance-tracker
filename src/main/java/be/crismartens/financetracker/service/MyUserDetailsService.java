@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -32,6 +33,14 @@ public class MyUserDetailsService implements UserDetailsService {
                     .build();
         } else {
             throw new UsernameNotFoundException(username + "not found");
+        }
+    }
+
+    @Transactional
+    public void deleteUser(UserDetails user) {
+        Optional<AppUser> myUserOptional = userRepository.findByUsername(user.getUsername());
+        if (myUserOptional.isPresent()) {
+            userRepository.delete(myUserOptional.get());
         }
     }
 }

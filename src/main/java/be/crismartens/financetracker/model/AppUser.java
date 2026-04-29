@@ -18,13 +18,9 @@ public class AppUser {
     private String password;
     private String authority;
 
-    @OneToMany(mappedBy = "appUser")
-    private Set<Expense> expenses;
-
     public AppUser() {}
 
-    public AppUser(Long id, String username, String email, String password, String authority) {
-        this.id = id;
+    public AppUser(String username, String email, String password, String authority) {
         this.username = username;
         this.email = email;
         this.password = password;

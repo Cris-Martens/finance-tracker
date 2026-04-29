@@ -1,0 +1,2 @@
+ALTER TABLE budget
+    ADD CONSTRAINT UC_BUDGET_USER_CATEGORY UNIQUE (user_id, category_id);
