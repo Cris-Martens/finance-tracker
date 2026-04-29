@@ -8,6 +8,7 @@ import be.crismartens.financetracker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -29,12 +30,22 @@ public class AccountService {
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
         Optional<AccountInfo> updatingAccountInfo = accountRepository.findByAppUser_Id(user.getId());
         if (updatingAccountInfo.isPresent()) {
-            updatingAccountInfo.get().setFirstName(accountInfo.getFirstName());
-            updatingAccountInfo.get().setLastName(accountInfo.getLastName());
-            updatingAccountInfo.get().setCountry(accountInfo.getCountry());
+            if (accountInfo.getFirstName() != null) {
+                updatingAccountInfo.get().setFirstName(accountInfo.getFirstName());
+            }
+            if (accountInfo.getLastName() != null) {
+                updatingAccountInfo.get().setLastName(accountInfo.getLastName());
+            }
+            if (accountInfo.getCountry() != null) {
+                updatingAccountInfo.get().setCountry(accountInfo.getCountry());
+            }
+            if (accountInfo.getMonthlyIncome() != null) {
+                updatingAccountInfo.get().setMonthlyIncome(accountInfo.getMonthlyIncome());
+            }
 
             accountRepository.save(updatingAccountInfo.get());
         } else {
+            System.out.println(accountInfo.getMonthlyIncome());
             accountInfo.setAppUser(user);
 
             accountRepository.save(accountInfo);
