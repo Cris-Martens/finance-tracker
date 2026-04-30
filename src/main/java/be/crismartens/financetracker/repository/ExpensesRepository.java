@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.nio.file.attribute.UserPrincipal;
 import java.time.LocalDate;
 import java.util.List;
@@ -44,5 +45,16 @@ public interface ExpensesRepository extends CrudRepository<Expense, Long> {
             group by e.category
             Order by e.category.id
             """)
-    List<Object[]> findExpensesPerCategoryByAppUser_IdAndThisMonth(@Param("userId") Long userId, @Param("start") LocalDate start, @Param("end") LocalDate end);
+    List<Object[]> findExpensesPerCategoryByAppUser_IdAndThisMonth(@Param("userId") Long userId,
+                                                                   @Param("start") LocalDate start,
+                                                                   @Param("end") LocalDate end);
+
+    @Query("""
+            select SUM(e.amount) as total
+            from Expense e
+            where e.appUser.id = :userId
+            and e.expenseDate between :start and :end
+""")
+    BigDecimal getSumExpensesByAppUser_IdAndMonth(@Param("userId") Long userId, @Param("start") LocalDate start,
+                                                  @Param("end") LocalDate end);
 }

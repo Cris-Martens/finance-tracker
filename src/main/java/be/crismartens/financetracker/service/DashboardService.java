@@ -3,15 +3,13 @@ package be.crismartens.financetracker.service;
 import be.crismartens.financetracker.model.BudgetAndSpendDTO;
 import be.crismartens.financetracker.model.CategoryBudget;
 import be.crismartens.financetracker.model.ExpenseDTO;
-import be.crismartens.financetracker.repository.BudgetRepository;
-import be.crismartens.financetracker.repository.CategoryRepository;
-import be.crismartens.financetracker.repository.ExpensesRepository;
-import be.crismartens.financetracker.repository.UserRepository;
+import be.crismartens.financetracker.repository.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
@@ -21,16 +19,17 @@ import java.util.*;
 public class DashboardService {
     private final UserRepository userRepository;
     private final ExpensesRepository expensesRepository;
-    private final CategoryRepository categoryRepository;
     private final BudgetRepository budgetRepository;
+    private final AccountRepository accountRepository;
 
     public DashboardService(UserRepository userRepository,
                             ExpensesRepository expensesRepository,
-                            CategoryRepository categoryRepository, BudgetRepository budgetRepository) {
+                            BudgetRepository budgetRepository,
+                            AccountRepository accountRepository) {
         this.userRepository = userRepository;
         this.expensesRepository = expensesRepository;
-        this.categoryRepository = categoryRepository;
         this.budgetRepository = budgetRepository;
+        this.accountRepository = accountRepository;
     }
 
     public List<ExpenseDTO> getLatestExpensesByAppUserId(UserDetails principal) {
@@ -89,6 +88,24 @@ public class DashboardService {
             return budgetAndSpendDTOs;
         } else {
             return new ArrayList<>();
+        }
+    }
+
+    public BigDecimal getSavedAmount(UserDetails principal) {
+        Long userId = userRepository.findIdByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException(principal.getUsername()));
+
+        BigDecimal income = accountRepository.findByAppUser_Id(userId).get().getMonthlyIncome();
+        if (income != null) {
+            YearMonth thisMonth = YearMonth.now();
+            LocalDate start = thisMonth.atDay(1);
+            LocalDate end = thisMonth.atEndOfMonth();
+
+            BigDecimal totalSpend = expensesRepository.getSumExpensesByAppUser_IdAndMonth(userId, start, end);
+
+            return income.min(totalSpend);
+        } else  {
+            return null;
         }
     }
 }
