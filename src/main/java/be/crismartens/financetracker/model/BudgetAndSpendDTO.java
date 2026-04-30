@@ -5,13 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class BudgetAndSpendDTO {
-    private String categoryName;
-    private Double budget;
-    private Double spend;
-    private Double remaining;
+    private String category;
+    private double budget;
+    private double spend;
+    private double remaining;
 }
