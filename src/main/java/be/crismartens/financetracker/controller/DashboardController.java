@@ -1,5 +1,6 @@
 package be.crismartens.financetracker.controller;
 
+import be.crismartens.financetracker.model.BudgetAndSpendDTO;
 import be.crismartens.financetracker.model.ExpenseDTO;
 import be.crismartens.financetracker.repository.CategoryRepository;
 import be.crismartens.financetracker.repository.ExpensesRepository;
@@ -34,6 +35,11 @@ public class DashboardController {
     @GetMapping("/dashboard/expenses-by-month")
     public Map<String, Double> ExpensesByMonth(@AuthenticationPrincipal UserDetails principal) {
         return dashboardService.getUserExpensesByMonth(principal);
+    }
+
+    @GetMapping("/dashboard/category-budget-left")
+    public List<BudgetAndSpendDTO> BudgetLeft(@AuthenticationPrincipal UserDetails principal) {
+        return dashboardService.getSmallestBudgetRemainders(principal);
     }
 }
 
