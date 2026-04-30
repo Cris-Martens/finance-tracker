@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -25,9 +26,14 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
-    @GetMapping("/dashboard")
-    public List<ExpenseDTO> listLatestExpenses(@AuthenticationPrincipal UserDetails user) {
-        return dashboardService.getLatestExpensesByAppUserId(user);
+    @GetMapping("/dashboard/latest-expenses")
+    public List<ExpenseDTO> listLatestExpenses(@AuthenticationPrincipal UserDetails principal) {
+        return dashboardService.getLatestExpensesByAppUserId(principal);
+    }
+
+    @GetMapping("/dashboard/expenses-by-month")
+    public Map<String, Double> ExpensesByMonth(@AuthenticationPrincipal UserDetails principal) {
+        return dashboardService.getUserExpensesByMonth(principal);
     }
 }
 
