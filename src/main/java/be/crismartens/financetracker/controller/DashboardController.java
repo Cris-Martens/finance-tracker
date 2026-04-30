@@ -1,5 +1,6 @@
 package be.crismartens.financetracker.controller;
 
+import be.crismartens.financetracker.model.BudgetAndSpendDTO;
 import be.crismartens.financetracker.model.ExpenseDTO;
 import be.crismartens.financetracker.repository.CategoryRepository;
 import be.crismartens.financetracker.repository.ExpensesRepository;
@@ -12,8 +13,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -25,9 +28,24 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
-    @GetMapping("/dashboard")
-    public List<ExpenseDTO> listLatestExpenses(@AuthenticationPrincipal UserDetails user) {
-        return dashboardService.getLatestExpensesByAppUserId(user);
+    @GetMapping("/dashboard/latest-expenses")
+    public List<ExpenseDTO> listLatestExpenses(@AuthenticationPrincipal UserDetails principal) {
+        return dashboardService.getLatestExpensesByAppUserId(principal);
+    }
+
+    @GetMapping("/dashboard/expenses-by-month")
+    public Map<String, Double> ExpensesByMonth(@AuthenticationPrincipal UserDetails principal) {
+        return dashboardService.getUserExpensesByMonth(principal);
+    }
+
+    @GetMapping("/dashboard/category-budget-left")
+    public List<BudgetAndSpendDTO> BudgetLeft(@AuthenticationPrincipal UserDetails principal) {
+        return dashboardService.getSmallestBudgetRemainders(principal);
+    }
+
+    @GetMapping("/dashboard/totalsaved")
+    public BigDecimal getTotalSavedAmount(@AuthenticationPrincipal UserDetails principal) {
+        return dashboardService.getSavedAmount(principal);
     }
 }
 
