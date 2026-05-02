@@ -1,5 +1,7 @@
-package be.crismartens.financetracker.model;
+package be.crismartens.financetracker.dto;
 
+import be.crismartens.financetracker.model.Category;
+import be.crismartens.financetracker.model.Expense;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;

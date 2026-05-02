@@ -7,8 +7,6 @@ import be.crismartens.financetracker.model.CategoryBudget;
 import be.crismartens.financetracker.repository.BudgetRepository;
 import be.crismartens.financetracker.repository.CategoryRepository;
 import be.crismartens.financetracker.repository.UserRepository;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -16,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-@Setter
-@Getter
 @Service
 public class BudgetService {
     private final BudgetRepository budgetRepository;
@@ -32,9 +28,13 @@ public class BudgetService {
         this.categoryRepository = categoryRepository;
     }
 
+    private Long findAppUserId(UserDetails principal) {
+        return userRepository.findIdByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+    }
+
     @Transactional
     public void saveBudgets(UserDetails principal, Map<String, Double> budgets) {
-        System.out.println("Saving budgets");
         AppUser user = userRepository.findByUsername(principal.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
@@ -53,8 +53,7 @@ public class BudgetService {
     }
 
     public Map<String, Double> getAllBudgets(UserDetails principal) {
-        Long userId = userRepository.findIdByUsername(principal.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        Long userId = findAppUserId(principal);
         List<CategoryBudget> budgets = budgetRepository.getCategoryBudgetByAppUser_Id(userId);
         Map<String, Double> budgetsMap = new LinkedHashMap<>();
         for  (CategoryBudget budget : budgets) {
@@ -64,8 +63,8 @@ public class BudgetService {
     }
 
     public void updateBudgets(UserDetails principal, Map<String, Double> budgets) {
-        Long userId = userRepository.findIdByUsername(principal.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        Long userId = findAppUserId(principal);
+
         for (String key : budgets.keySet()) {
             Long categoryId = categoryRepository.findIdByName(key);
             CategoryBudget budget = budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(userId, categoryId);
@@ -75,16 +74,13 @@ public class BudgetService {
     }
 
     public void deleteBudgets(UserDetails principal, String category) {
-        System.out.println("Deleting budgets");
-        Long userId = userRepository.findIdByUsername(principal.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
-        System.out.println(userId);
+        Long userId = findAppUserId(principal);
+
         Long categoryId = categoryRepository.findIdByName(category);
-        System.out.println(categoryId);
+
         if (categoryId != null) {
             CategoryBudget budget = budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(userId, categoryId);
             if (budget != null) {
-                System.out.println(budget.getAmount());
                 budgetRepository.delete(budget);
             }
         }

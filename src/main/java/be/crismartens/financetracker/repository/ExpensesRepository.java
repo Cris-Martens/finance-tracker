@@ -1,16 +1,14 @@
 package be.crismartens.financetracker.repository;
 
 import be.crismartens.financetracker.model.Expense;
-import be.crismartens.financetracker.model.ExpenseDTO;
+import be.crismartens.financetracker.dto.ExpenseDTO;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
-import java.nio.file.attribute.UserPrincipal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface ExpensesRepository extends CrudRepository<Expense, Long> {

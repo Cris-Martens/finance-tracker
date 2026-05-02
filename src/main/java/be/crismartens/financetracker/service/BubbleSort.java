@@ -1,6 +1,6 @@
 package be.crismartens.financetracker.service;
 
-import be.crismartens.financetracker.model.BudgetAndSpendDTO;
+import be.crismartens.financetracker.dto.BudgetAndSpendDTO;
 
 import java.util.List;
 

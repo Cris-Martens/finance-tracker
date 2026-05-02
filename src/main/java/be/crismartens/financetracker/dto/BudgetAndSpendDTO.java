@@ -1,14 +1,12 @@
-package be.crismartens.financetracker.model;
+package be.crismartens.financetracker.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public class BudgetAndSpendDTO {
     private String category;
     private double budget;

@@ -5,7 +5,7 @@ import be.crismartens.financetracker.ExpenseNotFoundException;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.Expense;
-import be.crismartens.financetracker.model.ExpenseDTO;
+import be.crismartens.financetracker.dto.ExpenseDTO;
 import be.crismartens.financetracker.repository.CategoryRepository;
 import be.crismartens.financetracker.repository.ExpensesRepository;
 import be.crismartens.financetracker.repository.UserRepository;
