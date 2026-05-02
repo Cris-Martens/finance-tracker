@@ -1,5 +1,6 @@
-package be.crismartens.financetracker.model;
+package be.crismartens.financetracker.dto;
 
+import be.crismartens.financetracker.model.AccountInfo;
 import lombok.Getter;
 import lombok.Setter;
 

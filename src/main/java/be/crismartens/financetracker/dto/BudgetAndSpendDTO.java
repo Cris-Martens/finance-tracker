@@ -1,4 +1,4 @@
-package be.crismartens.financetracker.model;
+package be.crismartens.financetracker.dto;
 
 import lombok.*;
 

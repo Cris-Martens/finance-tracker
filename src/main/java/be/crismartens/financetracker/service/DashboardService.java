@@ -1,10 +1,9 @@
 package be.crismartens.financetracker.service;
 
-import be.crismartens.financetracker.model.BudgetAndSpendDTO;
+import be.crismartens.financetracker.dto.BudgetAndSpendDTO;
 import be.crismartens.financetracker.model.CategoryBudget;
-import be.crismartens.financetracker.model.ExpenseDTO;
+import be.crismartens.financetracker.dto.ExpenseDTO;
 import be.crismartens.financetracker.repository.*;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;

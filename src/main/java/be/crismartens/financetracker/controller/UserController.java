@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1")
 public class UserController {
     private final UserRepository userRepository;
-    private final PasswordEncoder encoder;
     private final MyUserDetailsService userDetailsService;
 
     @Autowired
@@ -23,27 +22,16 @@ public class UserController {
                           PasswordEncoder encoder,
                           MyUserDetailsService userDetailsService) {
         this.userRepository = userRepository;
-        this.encoder = encoder;
         this.userDetailsService = userDetailsService;
     }
 
     @PostMapping(path = "/register")
-    public ResponseEntity<UserResponse> registerUser(@RequestBody RegistrationRequest request) {
-        var user = new AppUser();
-        user.setUsername(request.username());
-        user.setEmail(request.email());
-        user.setPassword(encoder.encode(request.password()));
-        user.setAuthority("ROLE_USER");
-
-        userRepository.save(user);
-
-        return ResponseEntity.ok(new UserResponse("User added!", user.getUsername()));
+    public ResponseEntity<UserResponse> registerUser(@RequestBody AppUser user) {
+        return userDetailsService.registerUser(user);
     }
 
     @DeleteMapping("/delete")
     public void deleteUser(@AuthenticationPrincipal UserDetails user) {
         userDetailsService.deleteUser(user);
     }
-
-    record RegistrationRequest(String username, String email, String password) {}
 }

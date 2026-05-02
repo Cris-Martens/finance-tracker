@@ -1,7 +1,7 @@
 package be.crismartens.financetracker.controller;
 
 import be.crismartens.financetracker.model.Expense;
-import be.crismartens.financetracker.model.ExpenseDTO;
+import be.crismartens.financetracker.dto.ExpenseDTO;
 import be.crismartens.financetracker.service.ExpensesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1")

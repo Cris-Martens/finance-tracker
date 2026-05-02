@@ -1,4 +1,6 @@
-package be.crismartens.financetracker.model;
+package be.crismartens.financetracker.dto;
+
+import be.crismartens.financetracker.model.CategoryBudget;
 
 public class CategoryBudgetDTO {
     private String categoryName;

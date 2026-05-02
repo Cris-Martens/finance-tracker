@@ -1,7 +1,7 @@
 package be.crismartens.financetracker.controller;
 
 import be.crismartens.financetracker.model.AccountInfo;
-import be.crismartens.financetracker.model.AccountInfoDTO;
+import be.crismartens.financetracker.dto.AccountInfoDTO;
 import be.crismartens.financetracker.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

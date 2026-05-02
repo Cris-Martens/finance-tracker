@@ -1,6 +1,6 @@
 package be.crismartens.financetracker.service;
 
-import be.crismartens.financetracker.model.BudgetAndSpendDTO;
+import be.crismartens.financetracker.dto.BudgetAndSpendDTO;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
