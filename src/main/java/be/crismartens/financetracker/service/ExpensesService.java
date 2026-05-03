@@ -2,6 +2,7 @@ package be.crismartens.financetracker.service;
 
 import be.crismartens.financetracker.CategoryNotFoundException;
 import be.crismartens.financetracker.ExpenseNotFoundException;
+import be.crismartens.financetracker.UnauthorisedAccessException;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.Expense;
@@ -34,71 +35,114 @@ public class ExpensesService {
 
     @Transactional
     public List<ExpenseDTO> getExpensesByAppUserId(UserDetails user) throws UsernameNotFoundException {
-        Optional<Long> userId = userRepository.findIdByUsername(user.getUsername());
-        System.out.println("Attempt to use userId");
-        if  (userId.isPresent()) {
-            List<ExpenseDTO> expensesDTO = new ArrayList<>();
-            List<Expense> expenses = expensesRepository.
-                    findExpensesByAppUserId(userId.get());
-            for (Expense expense: expenses) {
-                expensesDTO.add(new ExpenseDTO(expense));
-            }
-            return expensesDTO;
+        // check if user exists
+        Long userId = userRepository.findIdByUsername(user.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+
+        // get expenses
+        List<Expense> expenses = expensesRepository.findExpensesByAppUserId(userId);
+
+        // return empty list when no expenses are found
+        if (expenses.isEmpty()) {
+            return new ArrayList<>();
         }
-        return new ArrayList<>();
+
+        // convert expense object to dto's
+        List<ExpenseDTO> expensesDTO = new ArrayList<>();
+        for (Expense expense : expenses) {
+            expensesDTO.add(new ExpenseDTO(expense));
+        }
+        return expensesDTO;
     }
 
-    public ExpenseDTO getExpenseById(long id, UserDetails user) throws ExpenseNotFoundException, UsernameNotFoundException{
-        Optional<Expense> expense = expensesRepository.findById(id);
+    public ExpenseDTO getExpenseById(long id, UserDetails user) throws UsernameNotFoundException, ExpenseNotFoundException {
+        // check if user exists
         Optional<Long> userId = userRepository.findIdByUsername(user.getUsername());
-        if (expense.isEmpty()) {
-            throw new ExpenseNotFoundException("Expense with id " + id+ " not found" );
-        }
         if (userId.isEmpty()) {
             throw new UsernameNotFoundException("User: " + user.getUsername() + " not found");
         }
-        if (!userId.get().equals(expense.get().getAppUser().getId())) {
-            throw new UsernameNotFoundException("User: " + user.getUsername() + " not found");
+
+        // check if expense exists
+        Optional<Expense> expense = expensesRepository.findById(id);
+        if (expense.isEmpty()) {
+            throw new ExpenseNotFoundException("Expense with id " + id+ " not found" );
         }
+
+        // check if user owns expense
+        if (!userId.get().equals(expense.get().getAppUser().getId())) {
+            throw new UnauthorisedAccessException("Unauthorised");
+        }
+
+        // get expense dto
         return new ExpenseDTO(expense.get());
     }
 
     public void addExpense(Expense expense, UserDetails principal) {
-        Optional<AppUser> user = userRepository.findByUsername(principal.getUsername());
-        user.ifPresent(expense::setAppUser);
+        // check if user exists
+        AppUser user = userRepository.findByUsername(principal.getUsername())
+                        .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+
+        // check if category exists
+        Category category = categoryRepository.findById(expense.getCategory().getId())
+                        .orElseThrow(() -> new CategoryNotFoundException("category not found"));
+
+        // add user and category to expense
+        expense.setAppUser(user);
+        expense.setCategory(category);
 
         expensesRepository.save(expense);
     }
 
+    @Transactional
     public void updateExpense(Expense expense, UserDetails principal) throws ExpenseNotFoundException, UsernameNotFoundException {
-        Optional<Long> userId = userRepository.findIdByUsername(principal.getUsername());
-        Optional<Category> category = categoryRepository.findByName(expense.getCategory().getName());
-        if (category.isEmpty()) {
-            throw new CategoryNotFoundException(expense.getCategory().getName() + "not found.");
-        }
-        if (userId.isEmpty()) {
-            throw new UsernameNotFoundException("User: " + principal.getUsername() + " not found");
-        }
-        Expense updateExpense = expensesRepository.findById(expense.getId()).get();
-        if (userId.get().equals(updateExpense.getAppUser().getId())) {
-            updateExpense.setExpenseDate(expense.getExpenseDate());
-            updateExpense.setCategory(category.get());
-            updateExpense.setAmount(expense.getAmount());
-            updateExpense.setDescription(expense.getDescription());
-            updateExpense.setAppUser(userRepository.findByUsername(principal.getUsername()).get());
+        // Check User
+        Long userId = userRepository.findIdByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
-            expensesRepository.save(updateExpense);
+        // check if Expense exists
+        Expense updateExpense = expensesRepository.findById(expense.getId())
+                .orElseThrow(() -> new ExpenseNotFoundException("Expense with id " + expense.getId() + " not found"));
+
+        // Check if new category exists then overwrite based on id
+        if (expense.getCategory() != null) {
+            Category category = categoryRepository.findById(expense.getCategory().getId())
+                    .orElseThrow(() -> new CategoryNotFoundException("category not found"));
+            updateExpense.setCategory(category);
         }
+
+        // Check if user owns expense
+        if (!userId.equals(updateExpense.getAppUser().getId())) {
+            throw new UnauthorisedAccessException("Unauthorised");
+        }
+
+        if (expense.getExpenseDate() != null) {
+            updateExpense.setExpenseDate(expense.getExpenseDate());
+        }
+        if (expense.getAmount() != null) {
+            updateExpense.setAmount(expense.getAmount());
+        }
+        if (expense.getDescription() != null) {
+            updateExpense.setDescription(expense.getDescription());
+        }
+
+        expensesRepository.save(updateExpense);
     }
 
     public void deleteExpense(Expense expense, UserDetails principal) {
-        Optional<AppUser> user = userRepository.findByUsername(principal.getUsername());
-        if (user.isPresent()) {
-            Expense deleteExpense = expensesRepository.findById(expense.getId()).get();
-            if (Objects.equals(deleteExpense.getAppUser().getId(), user.get().getId())) {
-                expensesRepository.delete(deleteExpense);
-            }
+        // check if user exists
+        Long userId = userRepository.findIdByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
+        // check if expense exists
+        Expense deleteExpense = expensesRepository.findById(expense.getId())
+                .orElseThrow(() -> new ExpenseNotFoundException("Expense with id " + expense.getId() + " not found"));
+
+        // check if user owns expense
+        if (!userId.equals(deleteExpense.getAppUser().getId())) {
+            throw new UnauthorisedAccessException("Unauthorised");
         }
+
+        // delete expense
+        expensesRepository.delete(expense);
     }
 }

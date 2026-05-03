@@ -24,8 +24,8 @@ class UserValidationServiceTest {
     @BeforeAll
     static void setup() {
         emails = new String[] {"markg@outlook.com", "john@google.com", "Francesca",
-                "mary@l@gmail.com", "tom@gmail.com", "willfried@outlook.com"};
-        passwords = new String[] {"!8aDr-Ld&5ds", "@kd0Lm-dls!A4", "8&3dlS-D4L3D!s", "pass2", "passWord", "slaLom8!ld"};
+                "mary@l@gmail.com", "tom@gmail.com", "test@example.com"};
+        passwords = new String[] {"!8aDr-Ld&5ds", "@kd0Lm-dls!A4", "8&3dlS-D4L3D!s", "pass2", "passWord", "ValidPass123!"};
         expectedOutcomesIsValid = new boolean[] {true, true, false, false, false, true};
         expectedOutcomesEmail = new boolean[] {true, true, false, false, true, true};
         expectedOutcomesPassword = new boolean[] {true, true, true, false, false, true};

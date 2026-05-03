@@ -1,5 +1,6 @@
 package be.crismartens.financetracker.service;
 
+import be.crismartens.financetracker.InvalidUserException;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.UserRepository;
 import be.crismartens.financetracker.response.UserResponse;
@@ -57,16 +58,19 @@ public class MyUserDetailsService implements UserDetailsService {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        if (!userValidationService.isValid(user)) {
+            throw new InvalidUserException("Invalid email or weak password");
+        }
         var appUser = new AppUser();
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+
         appUser.setUsername(user.getUsername());
         appUser.setEmail(user.getEmail());
         appUser.setPassword(encoder.encode(user.getPassword()));
         appUser.setAuthority("ROLE_USER");
-        if (userValidationService.isValid(user)) {
-            userRepository.save(appUser);
-            return ResponseEntity.ok(new UserResponse("New User saved", appUser.getUsername()));
-        }
-        return ResponseEntity.ok(new UserResponse("invalid email or weak password.", user.getUsername()));
+
+        userRepository.save(appUser);
+
+        return ResponseEntity.ok(new UserResponse("New User saved: ", appUser.getUsername()));
     }
 }
