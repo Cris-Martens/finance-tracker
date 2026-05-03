@@ -12,7 +12,6 @@ import be.crismartens.financetracker.repository.ExpensesRepository;
 import be.crismartens.financetracker.repository.UserRepository;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
