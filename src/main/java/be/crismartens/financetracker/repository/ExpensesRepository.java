@@ -12,10 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ExpensesRepository extends CrudRepository<Expense, Long> {
-    // @Query("select e from Expense e join fetch e.category where e.appUser.id = :userId")
-    List<Expense> findExpensesByAppUserId( //@Param("user_id")
-                                                                                 Long userId);
-    Optional<Expense> findByIdAndAppUserUsername(Long Id, String username);
+    List<Expense> findExpensesByAppUserId(Long userId);
 
     @Query("""
             select e from Expense e join fetch e.category where 
