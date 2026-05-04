@@ -2,7 +2,6 @@ package be.crismartens.financetracker.service;
 
 import be.crismartens.financetracker.model.AccountInfo;
 import be.crismartens.financetracker.dto.AccountInfoDTO;
-import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.AccountRepository;
 import be.crismartens.financetracker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

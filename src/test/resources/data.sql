@@ -1,5 +1,5 @@
 INSERT INTO app_user(username, email, password, authority)
-    VALUES ('Mark', 'mark@google.com', '$2a$10$xyh/VKW5IAR88h.j6f4AYe7NqnHEK6a47X8j8LyHrebGHKb20yxMG', 'ROLE_USER'),
+    VALUES ('Mark', 'mark@google.com', 'ValidPass123!', 'ROLE_USER'),
            ('JohnDoe', 'johndoe@gmail.com', '$2a$10$wfObPax/4e4eyTtHlzRVq.gYCJA/ZFV0Gj7Zz29soqm63KvbM7IAq', 'ROLE_USER');
 
 INSERT INTO account_info(first_name, last_name, country, monthly_income, user_id)
