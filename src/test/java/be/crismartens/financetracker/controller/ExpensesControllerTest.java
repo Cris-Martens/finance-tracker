@@ -1,5 +1,7 @@
 package be.crismartens.financetracker.controller;
 
+import be.crismartens.financetracker.EmptyExpenseException;
+import be.crismartens.financetracker.ExpenseNotFoundException;
 import be.crismartens.financetracker.dto.ExpenseDTO;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.Expense;
@@ -29,8 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -133,6 +134,8 @@ class ExpensesControllerTest {
         // Act & Assert
         mockMvc.perform(get("/api/v1/user/expenses"))
                 .andExpect(status().isUnauthorized());
+
+        verify(expensesService, never()).getExpensesByAppUserId(any());
     }
 
     // =========== GET /api/v1/user/expenses/{id} ===========
@@ -160,10 +163,16 @@ class ExpensesControllerTest {
     @WithMockUser(username = "testUser", authorities = "ROLE_USER")
     @DisplayName("GET expense by id - expense not found")
     void getExpenseByIdNotFound() throws Exception {
+        // Arrange
+        doThrow(ExpenseNotFoundException.class)
+                .when(expensesService).getExpenseById(anyLong(), any());
+
         // Act & Assert
-        mockMvc.perform(get("/api/v1/user/expenses/1"))
+        mockMvc.perform(get("/api/v1/user/expenses/1")
+                .contentType(String.valueOf(MediaType.APPLICATION_JSON)))
                 .andExpect(status().isNotFound());
-        verify(expensesService, times(1)).getExpenseById(anyLong(), any());
+
+        verify(expensesService, times(1)).getExpenseById(eq(1L), any());
     }
 
     @Test
@@ -172,6 +181,8 @@ class ExpensesControllerTest {
         // Act & Assert
         mockMvc.perform(get("/api/v1/user/expenses/1"))
                 .andExpect(status().isUnauthorized());
+
+        verify(expensesService, never()).getExpenseById(anyLong(), any());
     }
 
     // =========== POST /api/v1/user/expenses ===========
@@ -204,7 +215,8 @@ class ExpensesControllerTest {
     @DisplayName("POST empty expense authorized")
     void addExpenseAuthorisedEmpty() throws Exception {
         // Arrange
-        doNothing().when(expensesService).addExpense(any(Expense.class), any());
+        doThrow(EmptyExpenseException.class)
+                .when(expensesService).addExpense(any(Expense.class), any());
 
         Expense testExpense = new Expense();
 
@@ -235,6 +247,7 @@ class ExpensesControllerTest {
                 .content(objectMapper.writeValueAsString(testExpense))
                 .with(csrf()))
                 .andExpect(status().isUnauthorized());
+        verify(expensesService, never()).addExpense(any(Expense.class), any());
     }
 
     // =========== PUT /api/v1/user/expenses/{id} ===========
@@ -242,35 +255,142 @@ class ExpensesControllerTest {
     @Test
     @WithMockUser(username = "testUser", authorities = "ROLE_USER")
     @DisplayName("PUT update expense - success")
-    void updateExpenseSuccess() throws Exception {}
+    void updateExpenseSuccess() throws Exception {
+        // Arrange
+        doNothing().when(expensesService).updateExpense(any(Expense.class), any());
+
+        Expense updateExpense = new Expense();
+        updateExpense.setId(1L);
+        updateExpense.setExpenseDate(LocalDate.parse("2026-04-29"));
+        updateExpense.setAmount(64.95);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/user/expenses")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateExpense))
+                .with(csrf()))
+                .andExpect(status().isOk());
+        verify(expensesService, times(1)).updateExpense(any(Expense.class), any());
+    }
 
     @Test
     @WithMockUser(username = "testUser", authorities = "ROLE_USER")
     @DisplayName("PUT expense - not found")
-    void updateExpenseNotFound() throws Exception {}
+    void updateExpenseNotFound() throws Exception {
+        // Arrange
+        doThrow(new ExpenseNotFoundException("Expense not found"))
+                .when(expensesService).updateExpense(any(Expense.class), any());
+
+        Expense updateExpense = new Expense();
+        updateExpense.setId(5L);
+        updateExpense.setExpenseDate(LocalDate.parse("2026-04-29"));
+        updateExpense.setAmount(64.95);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/user/expenses")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateExpense))
+                .with(csrf()))
+                .andExpect(status().isNotFound());
+
+        verify(expensesService, times(1)).updateExpense(any(Expense.class), any());
+    }
 
     @Test
     @WithMockUser(username = "testUser", authorities = "ROLE_USER")
     @DisplayName("PUT expense -  empty values")
-    void updateExpenseEmptyValues() throws Exception {}
+    void updateExpenseEmptyValues() throws Exception {
+        // Arrange
+        doNothing().when(expensesService).addExpense(any(Expense.class), any());
+
+        Expense updateExpense = new Expense();
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/user/expenses")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateExpense))
+                .with(csrf()))
+                .andExpect(status().isOk());
+
+        verify(expensesService, times(1)).updateExpense(any(Expense.class), any());
+    }
 
     @Test
     @DisplayName("PUT expense - unauthorised")
-    void updateExpenseUnauthorized() throws Exception {}
+    void updateExpenseUnauthorized() throws Exception {
+        // Arrange
+        doNothing().when(expensesService).addExpense(any(Expense.class), any());
+
+        Expense updateExpense = new Expense();
+        updateExpense.setId(1L);
+        updateExpense.setExpenseDate(LocalDate.parse("2026-04-29"));
+        updateExpense.setAmount(64.95);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/user/expenses")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateExpense))
+                .with(csrf()))
+                .andExpect(status().isUnauthorized());
+        verify(expensesService, never()).updateExpense(any(Expense.class), any());
+    }
 
     // =========== DELETE /api/v1/user/expenses/{id} ===========
 
     @Test
     @WithMockUser(username = "testUser", authorities = "ROLE_USER")
     @DisplayName("DELETE expense - success")
-    void deleteExpenseSuccess() throws Exception {}
+    void deleteExpenseSuccess() throws Exception {
+        // Arrange
+        doNothing().when(expensesService).deleteExpense(any(Expense.class), any());
+
+        Expense deleteExpense = new Expense();
+        deleteExpense.setId(1L);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/v1/user/expenses")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(deleteExpense))
+                .with(csrf()))
+                .andExpect(status().isOk());
+        verify(expensesService, times(1)).deleteExpense(any(Expense.class), any());
+    }
 
     @Test
     @WithMockUser(username = "testUser", authorities = "ROLE_USER")
     @DisplayName("DELETE expense - not found")
-    void deleteExpenseNotFound() throws Exception {}
+    void deleteExpenseNotFound() throws Exception {
+        // Arrange
+        doThrow(new ExpenseNotFoundException("Expense not found"))
+                .when(expensesService).deleteExpense(any(Expense.class), any());
+
+        Expense deleteExpense = new Expense();
+        deleteExpense.setId(5L);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/v1/user/expenses")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(deleteExpense))
+                .with(csrf()))
+                .andExpect(status().isNotFound());
+
+        verify(expensesService, times(1)).deleteExpense(any(Expense.class), any());
+    }
 
     @Test
     @DisplayName("DELETE expense - unauthorized")
-    void deleteExpenseUnauthorized() throws Exception {}
+    void deleteExpenseUnauthorized() throws Exception {
+        // Arrange
+        Expense deleteExpense = new Expense();
+        deleteExpense.setId(1L);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/v1/user/expenses")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(deleteExpense))
+                .with(csrf()))
+                .andExpect(status().isUnauthorized());
+
+        verify(expensesService, never()).deleteExpense(any(Expense.class), any());
+    }
 }
