@@ -18,18 +18,6 @@ public class Expense {
     @JsonProperty("expense_date")
     private LocalDate expenseDate;
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Expense expense = (Expense) o;
-        return Objects.equals(id, expense.id) && Objects.equals(expenseDate, expense.expenseDate) && Objects.equals(amount, expense.amount) && Objects.equals(description, expense.description) && Objects.equals(appUser, expense.appUser) && Objects.equals(category, expense.category);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, expenseDate, amount, description, appUser, category);
-    }
-
     @Column(nullable = false)
     private Double amount;
     private String description;
@@ -98,6 +86,18 @@ public class Expense {
 
     public void setAppUser(AppUser appUser) {
         this.appUser = appUser;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Expense expense = (Expense) o;
+        return Objects.equals(id, expense.id) && Objects.equals(expenseDate, expense.expenseDate) && Objects.equals(amount, expense.amount) && Objects.equals(description, expense.description) && Objects.equals(appUser, expense.appUser) && Objects.equals(category, expense.category);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, expenseDate, amount, description, appUser, category);
     }
 }
 
