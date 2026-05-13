@@ -22,10 +22,10 @@ public class UserValidationService {
     }
 
     public boolean validateEmail(AppUser appUser) {
-        String email = appUser.getEmail();
-        if (appUser.getEmail() == null || appUser.getEmail().isBlank()) {
+        String email = appUser.getUsername();
+        if (appUser.getUsername() == null || appUser.getUsername().isBlank()) {
             return false;
-        } else if (!appUser.getEmail().contains("@")) {
+        } else if (!appUser.getUsername().contains("@")) {
             return false;
         } else return EMAIL.matcher(email).matches();
     }

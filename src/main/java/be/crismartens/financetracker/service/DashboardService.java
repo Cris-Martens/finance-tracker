@@ -90,19 +90,19 @@ public class DashboardService {
         }
     }
 
-    public BigDecimal getSavedAmount(UserDetails principal) {
+    public Double getSavedAmount(UserDetails principal) {
         Long userId = userRepository.findIdByUsername(principal.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException(principal.getUsername()));
 
-        BigDecimal income = accountRepository.findByAppUser_Id(userId).get().getMonthlyIncome();
+        Double income = accountRepository.findByAppUser_Id(userId).get().getMonthlyIncome();
         if (income != null) {
             YearMonth thisMonth = YearMonth.now();
             LocalDate start = thisMonth.atDay(1);
             LocalDate end = thisMonth.atEndOfMonth();
 
-            BigDecimal totalSpend = expensesRepository.getSumExpensesByAppUser_IdAndMonth(userId, start, end);
+            Double totalSpend = expensesRepository.getSumExpensesByAppUser_IdAndMonth(userId, start, end);
 
-            return income.min(totalSpend);
+            return income - totalSpend;
         } else  {
             return null;
         }

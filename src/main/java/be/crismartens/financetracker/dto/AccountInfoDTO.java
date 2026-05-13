@@ -4,8 +4,6 @@ import be.crismartens.financetracker.model.AccountInfo;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-
 @Getter
 @Setter
 public class AccountInfoDTO {
@@ -13,7 +11,7 @@ public class AccountInfoDTO {
     private String firstName;
     private String lastName;
     private String country;
-    private BigDecimal monthlyIncome;
+    private Double monthlyIncome;
 
     public AccountInfoDTO() {}
 

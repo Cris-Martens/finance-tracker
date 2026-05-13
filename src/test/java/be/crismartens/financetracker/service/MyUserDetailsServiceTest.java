@@ -1,6 +1,7 @@
 package be.crismartens.financetracker.service;
 
 import be.crismartens.financetracker.InvalidUserException;
+import be.crismartens.financetracker.auth.MyUserDetailsService;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.UserRepository;
 import be.crismartens.financetracker.response.UserResponse;
@@ -49,10 +50,8 @@ class MyUserDetailsServiceTest {
     void setUp() {
         // Set up test user
         appUser = new AppUser();
-        appUser.setUsername("testUser");
+        appUser.setUsername("example@test.com");
         appUser.setPassword("ValidPass123!");
-        appUser.setEmail("user@example.com");
-        appUser.setAuthority("ROLE_USER");
 
         // Set up user details;
         userDetails = new UserDetails() {
@@ -68,7 +67,7 @@ class MyUserDetailsServiceTest {
 
             @Override
             public String getUsername() {
-                return "testUser";
+                return "example@test.com";
             }
         };
     }
@@ -77,14 +76,14 @@ class MyUserDetailsServiceTest {
     @Test
     void registerUser_WhenUserExists_ThrowsException() {
         // Arrange
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.ofNullable(appUser));
+        when(userRepository.findByUsername("example@test.com")).thenReturn(Optional.ofNullable(appUser));
 
         // Act
         ResponseEntity<UserResponse> result = userDetailsService.registerUser(appUser);
 
         // Assert
         assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
-        verify(userRepository, times(1)).findByUsername("testUser");
+        verify(userRepository, times(1)).findByUsername("example@test.com");
         verify(userRepository, never()).save(any());
 
     }
@@ -93,11 +92,10 @@ class MyUserDetailsServiceTest {
     void registerUser_InvalidEmail_ThrowsException() {
         // Arrange
         AppUser newUser = new AppUser();
-        newUser.setUsername("testUser");
-        newUser.setEmail("InvalidEmail");
+        newUser.setUsername("invalidEmail");
         newUser.setPassword("ValidPass123!");
 
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(InvalidUserException.class, () -> userDetailsService.registerUser(appUser));
@@ -107,11 +105,10 @@ class MyUserDetailsServiceTest {
     void registerUser_WeakPassword_ThrowsException() {
         // Arrange
         AppUser newUser = new AppUser();
-        newUser.setUsername("testUser");
-        newUser.setEmail("test@example.com");
+        newUser.setUsername("example@test.com");
         newUser.setPassword("weakPassword");
 
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("example@test.com")).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(InvalidUserException.class, () -> userDetailsService.registerUser(newUser));
@@ -121,11 +118,10 @@ class MyUserDetailsServiceTest {
     void registerUser_AddNewUser() {
         // Arrange
         AppUser newUser = new AppUser();
-        newUser.setUsername("testUser");
-        newUser.setEmail("test@example.com");
+        newUser.setUsername("example@test.com");
         newUser.setPassword("ValidPass123!");
 
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("example@test.com")).thenReturn(Optional.empty());
         when(userValidationService.isValid(newUser)).thenReturn(true);
 
         // Act
@@ -135,8 +131,8 @@ class MyUserDetailsServiceTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("New User saved: ", response.getBody().getMessage());
-        assertEquals("testUser",  response.getBody().getUsername());
-        verify(userRepository, times(1)).findByUsername("testUser");
+        assertEquals("example@test.com",  response.getBody().getUsername());
+        verify(userRepository, times(1)).findByUsername("example@test.com");
         verify(userRepository, times(1)).save(any(AppUser.class));
     }
 
@@ -145,26 +141,26 @@ class MyUserDetailsServiceTest {
     @Test
     void deleteUser_UserDoesNotExist_ThrowsException() {
         // Arrange
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("example@test.com")).thenReturn(Optional.empty());
 
         // Act
         userDetailsService.deleteUser(userDetails);
 
         // Act & Assert
-        verify(userRepository, times(1)).findByUsername("testUser");
+        verify(userRepository, times(1)).findByUsername("example@test.com");
         verify(userRepository, never()).delete(any());
     }
 
     @Test
     void deleteUser_UserDoesExist() {
         // Arrange
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(appUser));
+        when(userRepository.findByUsername("example@test.com")).thenReturn(Optional.of(appUser));
 
         // Act
         userDetailsService.deleteUser(userDetails);
 
         // Assert
-        verify(userRepository, times(1)).findByUsername("testUser");
+        verify(userRepository, times(1)).findByUsername("example@test.com");
         verify(userRepository, times(1)).delete(any(AppUser.class));
     }
 
@@ -188,27 +184,27 @@ class MyUserDetailsServiceTest {
     @Test
     void loadByUsername_UserDoesNotExist_ThrowsException() {
         // Arrange
-        when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("nonexistent@test.com")).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername("nonexistent"));
-        verify(userRepository, times(1)).findByUsername("nonexistent");
+        assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername("nonexistent@test.com"));
+        verify(userRepository, times(1)).findByUsername("nonexistent@test.com");
     }
 
     @Test
     void loadByUsername_UserExists() {
         // Arrange
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(appUser));
+        when(userRepository.findByUsername("example@test.com")).thenReturn(Optional.of(appUser));
 
         // Act
-        UserDetails result = userDetailsService.loadUserByUsername("testUser");
+        UserDetails result = userDetailsService.loadUserByUsername("example@test.com");
 
         // Assert
         assertNotNull(result);
-        assertEquals("testUser", result.getUsername());
+        assertEquals("example@test.com", result.getUsername());
         assertEquals("ValidPass123!", result.getPassword());
         assertTrue(result.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_USER")));
-        verify(userRepository, times(1)).findByUsername("testUser");
+        verify(userRepository, times(1)).findByUsername("example@test.com");
     }
 }

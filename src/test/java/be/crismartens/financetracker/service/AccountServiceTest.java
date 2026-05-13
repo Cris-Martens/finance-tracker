@@ -52,7 +52,7 @@ class AccountServiceTest {
         testAccountInfo.setFirstName("John");
         testAccountInfo.setLastName("Doe");
         testAccountInfo.setCountry("Belgium");
-        testAccountInfo.setMonthlyIncome(new BigDecimal("2400.00"));
+        testAccountInfo.setMonthlyIncome(2400.00);
         testAccountInfo.setAppUser(testUser);
     }
 
@@ -97,7 +97,7 @@ class AccountServiceTest {
         newAccountInfo.setFirstName("John");
         newAccountInfo.setLastName("Doe");
         newAccountInfo.setCountry("Belgium");
-        newAccountInfo.setMonthlyIncome(new BigDecimal("2400.00"));
+        newAccountInfo.setMonthlyIncome(2400.00);
 
         // Act
         accountService.upsertAccountInfo(newAccountInfo, userDetails);

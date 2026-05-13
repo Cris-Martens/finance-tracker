@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create-drop
     show-sql: false
     properties:
       hibernate:
@@ -15,14 +15,10 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
     open-in-view: false
 
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
-
 app:
   crypto:
     password: ${FT_CRYPTO_PASSWORD}
-    salt: ${FT_CRYPTO_SALT}
+
 
   security:
     oauth2:
