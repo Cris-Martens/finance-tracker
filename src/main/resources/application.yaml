@@ -1,4 +1,7 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   application:
     name: finance-tracker
 
@@ -6,11 +9,11 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/finance
     username: root
-    password: tytRib-myksy7-rupmog
+    password: ${MYSQL_ROOT_PASSWORD}
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
@@ -18,7 +21,24 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
     open-in-view: false
 
+  flyway:
+    enabled: false
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            clientId: ${GITHUB_CLIENT_ID}
+            clientSecret: ${GITHUB_CLIENT_SECRET}
+
 app:
   crypto:
     password: ${FT_CRYPTO_PASSWORD}
-    salt: ${FT_CRYPTO_SALT}
+
+rsa:
+  private-key: classpath:keys/private.pem
+  public-key: classpath:keys/public.pem
+
+jwt:
+  expiration: 3600000

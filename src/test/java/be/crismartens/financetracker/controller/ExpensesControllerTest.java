@@ -8,18 +8,17 @@ import be.crismartens.financetracker.model.Expense;
 import be.crismartens.financetracker.service.ExpensesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DisplayName("ExpenseController Tests")
 class ExpensesControllerTest {
@@ -46,7 +44,7 @@ class ExpensesControllerTest {
     @MockitoBean
     private ExpensesService expensesService;
 
-    @Autowired
+
     private ObjectMapper objectMapper;
 
     private MockMvc mockMvc;
@@ -61,6 +59,8 @@ class ExpensesControllerTest {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
                 .apply(springSecurity()).build();
+
+        objectMapper = new ObjectMapper();
 
         expense1 = new Expense();
         expense1.setId(1L);

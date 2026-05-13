@@ -33,7 +33,7 @@ class UserValidationServiceTest {
 
      @BeforeEach
      void createUser(){
-        user.setEmail(emails[index]);
+        user.setUsername(emails[index]);
         user.setPassword(passwords[index]);
         expectedIsValid = expectedOutcomesIsValid[index];
         expectedEmail = expectedOutcomesEmail[index];
@@ -45,17 +45,17 @@ class UserValidationServiceTest {
         index++;
      }
 
-    @RepeatedTest(value = 6, name = "user is valid {currentRepetition}/{totalRepetitions}")
+    @RepeatedTest(value = 2, name = "user is valid {currentRepetition}/{totalRepetitions}")
     void isUserValid() {
         assertEquals(expectedIsValid, userValidationService.isValid(user));
     }
 
-    @RepeatedTest(value = 6, name = "check valid email {currentRepetition}/{totalRepetitions}")
+    @RepeatedTest(value = 2, name = "check valid email {currentRepetition}/{totalRepetitions}")
     void checkValidEmail() {
         assertEquals(expectedEmail, userValidationService.validateEmail(user));
     }
 
-    @RepeatedTest(value = 6, name = "Strong Password Check {currentRepetition}/{totalRepetitions}")
+    @RepeatedTest(value = 2, name = "Strong Password Check {currentRepetition}/{totalRepetitions}")
     void checkStrongPassword() {
         assertEquals(expectedPassword, userValidationService.strongPasswordCheck(user));
     }

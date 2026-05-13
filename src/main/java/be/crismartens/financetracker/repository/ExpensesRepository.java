@@ -5,12 +5,12 @@ import be.crismartens.financetracker.dto.ExpenseDTO;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
+@Repository
 public interface ExpensesRepository extends CrudRepository<Expense, Long> {
     List<Expense> findExpensesByAppUserId(Long userId);
 
@@ -50,6 +50,6 @@ public interface ExpensesRepository extends CrudRepository<Expense, Long> {
             where e.appUser.id = :userId
             and e.expenseDate between :start and :end
 """)
-    BigDecimal getSumExpensesByAppUser_IdAndMonth(@Param("userId") Long userId, @Param("start") LocalDate start,
+    Double getSumExpensesByAppUser_IdAndMonth(@Param("userId") Long userId, @Param("start") LocalDate start,
                                                   @Param("end") LocalDate end);
 }

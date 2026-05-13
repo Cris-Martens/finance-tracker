@@ -1,9 +1,10 @@
-package be.crismartens.financetracker.service;
+package be.crismartens.financetracker.auth;
 
 import be.crismartens.financetracker.InvalidUserException;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.UserRepository;
 import be.crismartens.financetracker.response.UserResponse;
+import be.crismartens.financetracker.service.UserValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ public class MyUserDetailsService implements UserDetailsService {
     private final UserValidationService userValidationService;
 
     // Constructor injection
+    @Autowired
     public MyUserDetailsService(UserRepository userRepository,
                                 UserValidationService userValidationService) {
         this.userRepository = userRepository;
@@ -65,9 +67,7 @@ public class MyUserDetailsService implements UserDetailsService {
         PasswordEncoder encoder = new BCryptPasswordEncoder();
 
         appUser.setUsername(user.getUsername());
-        appUser.setEmail(user.getEmail());
         appUser.setPassword(encoder.encode(user.getPassword()));
-        appUser.setAuthority("ROLE_USER");
 
         userRepository.save(appUser);
 

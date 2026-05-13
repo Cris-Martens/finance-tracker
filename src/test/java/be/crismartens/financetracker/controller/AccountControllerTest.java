@@ -9,7 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -17,7 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 
@@ -31,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DisplayName("AccountController Tests")
 class AccountControllerTest {
@@ -42,7 +40,6 @@ class AccountControllerTest {
     @MockitoBean
     private AccountService accountService;
 
-    @Autowired
     private ObjectMapper objectMapper;
 
     private MockMvc mockMvc;
@@ -55,12 +52,14 @@ class AccountControllerTest {
                 .webAppContextSetup(webContext)
                 .apply(springSecurity()).build();
 
+        objectMapper = new ObjectMapper();
+
         accountInfo = new AccountInfo();
         accountInfo.setId(1L);
         accountInfo.setFirstName("testFirstName");
         accountInfo.setLastName("testLastName");
         accountInfo.setCountry("testCountry");
-        accountInfo.setMonthlyIncome(new BigDecimal("2400.00"));
+        accountInfo.setMonthlyIncome(2400.00);
     }
 
     // =========== GET /api/v1/accountinfo ===========

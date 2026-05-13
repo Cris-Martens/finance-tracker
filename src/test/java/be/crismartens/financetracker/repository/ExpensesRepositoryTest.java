@@ -122,10 +122,10 @@ class ExpensesRepositoryTest {
         LocalDate start = LocalDate.parse("2026-04-01");
         LocalDate end = LocalDate.parse("2026-04-30");
 
-        BigDecimal expected = BigDecimal.valueOf(690.0 + 10.0 + 100.0);
+        Double expected = 690.0 + 10.0 + 100.0;
 
         // Act
-        BigDecimal result = expensesRepository.getSumExpensesByAppUser_IdAndMonth(1L, start, end);
+        Double result = expensesRepository.getSumExpensesByAppUser_IdAndMonth(1L, start, end);
 
         // Assert
         assertEquals(expected, result);

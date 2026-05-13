@@ -29,5 +29,14 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### Docker ###
+.env
+*.env.local
+*.env.production
+
+### Keys ###
+src/main/resources/keys/private.pem
+src/main/resources/keys/public.pem
+
 ### VS Code ###
 .vscode/
