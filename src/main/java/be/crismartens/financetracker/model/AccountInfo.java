@@ -2,6 +2,7 @@ package be.crismartens.financetracker.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,4 +29,6 @@ public class AccountInfo {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private AppUser appUser;
+
+    public AccountInfo(String firstName, String lastName, String country, Double monthlyIncome,  AppUser appUser) {}
 }
