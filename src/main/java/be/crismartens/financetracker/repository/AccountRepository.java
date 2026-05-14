@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.concurrent.Future;
 
 @Repository
 public interface AccountRepository extends CrudRepository<AccountInfo, Long> {
@@ -15,4 +16,6 @@ public interface AccountRepository extends CrudRepository<AccountInfo, Long> {
             select a from AccountInfo a where a.appUser.id = :userId
             """)
     Optional<AccountInfo> findByAppUser_Id(@Param("userId") Long userId);
+
+    Double findMonthlyIncomeByAppUser_Id(Long userId);
 }
