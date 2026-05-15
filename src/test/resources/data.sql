@@ -4,7 +4,7 @@ INSERT INTO app_users (username, password, authority)
 
 INSERT INTO account_info (first_name, last_name, country, monthly_income, user_id)
     VALUES ('Mark', 'Marquez', 'Belgium', 2400, 1),
-           ('John', 'Doe', 'France', 2500, 2);
+           ('John', 'Doe', 'France', null, 2);
 
 INSERT INTO category (id, name)
     VALUES  (1, 'Housing'),

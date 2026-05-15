@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class DashboardService {
@@ -90,11 +91,11 @@ public class DashboardService {
         }
     }
 
-    public Double getSavedAmount(UserDetails principal) {
+    public Double getSavedAmount(UserDetails principal) throws ExecutionException, InterruptedException {
         Long userId = userRepository.findIdByUsername(principal.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException(principal.getUsername()));
 
-        Double income = accountRepository.findByAppUser_Id(userId).get().getMonthlyIncome();
+        Double income = accountRepository.findMonthlyIncomeByAppUser_Id(userId);
         if (income != null) {
             YearMonth thisMonth = YearMonth.now();
             LocalDate start = thisMonth.atDay(1);

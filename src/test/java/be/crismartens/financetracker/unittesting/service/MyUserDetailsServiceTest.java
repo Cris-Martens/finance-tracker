@@ -1,10 +1,11 @@
-package be.crismartens.financetracker.service;
+package be.crismartens.financetracker.unittesting.service;
 
 import be.crismartens.financetracker.InvalidUserException;
 import be.crismartens.financetracker.auth.MyUserDetailsService;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.UserRepository;
 import be.crismartens.financetracker.response.UserResponse;
+import be.crismartens.financetracker.service.UserValidationService;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,8 @@
-package be.crismartens.financetracker.repository;
+package be.crismartens.financetracker.unittesting.repository.repository;
 
 import be.crismartens.financetracker.dto.ExpenseDTO;
 import be.crismartens.financetracker.model.Expense;
+import be.crismartens.financetracker.repository.ExpensesRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

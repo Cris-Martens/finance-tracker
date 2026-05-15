@@ -1,4 +1,4 @@
-package be.crismartens.financetracker.controller;
+package be.crismartens.financetracker.unittesting.controller;
 
 import be.crismartens.financetracker.ExpenseNotFoundException;
 import be.crismartens.financetracker.dto.AccountInfoDTO;

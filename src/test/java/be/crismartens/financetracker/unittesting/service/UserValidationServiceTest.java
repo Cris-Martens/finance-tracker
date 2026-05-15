@@ -1,6 +1,7 @@
-package be.crismartens.financetracker.service;
+package be.crismartens.financetracker.unittesting.service;
 
 import be.crismartens.financetracker.model.AppUser;
+import be.crismartens.financetracker.service.UserValidationService;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -28,4 +28,6 @@ public class AccountInfo {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private AppUser appUser;
+
+    public AccountInfo(String firstName, String lastName, String country, Double monthlyIncome,  AppUser appUser) {}
 }

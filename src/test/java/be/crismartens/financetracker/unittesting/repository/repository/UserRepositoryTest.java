@@ -1,10 +1,12 @@
-package be.crismartens.financetracker.repository;
+package be.crismartens.financetracker.unittesting.repository.repository;
 
 import be.crismartens.financetracker.model.AppUser;
+import be.crismartens.financetracker.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -35,6 +37,16 @@ class UserRepositoryTest {
     }
 
     @Test
+    @DisplayName("Find user by username - does not exist")
+    void findUserByUsername_not_found() {
+        // Act
+        Optional<AppUser> user = userRepository.findByUsername("nonexistent");
+
+        // Assert
+        assertFalse(user.isPresent());
+    }
+
+    @Test
     @DisplayName("find user id by username")
     void findIdByUsername() {
         // Act
@@ -42,5 +54,15 @@ class UserRepositoryTest {
 
         // Assert
         assertEquals(1, id);
+    }
+
+    @Test
+    @DisplayName("Find user Id by username - does not exist")
+    void findIdByUsername_not_found() {
+        // Act
+        Optional<Long> id = userRepository.findIdByUsername("nonexistent");
+
+        // Assert
+        assertTrue(id.isEmpty());
     }
 }

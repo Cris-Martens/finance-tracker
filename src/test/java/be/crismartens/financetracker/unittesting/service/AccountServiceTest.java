@@ -1,10 +1,11 @@
-package be.crismartens.financetracker.service;
+package be.crismartens.financetracker.unittesting.service;
 
 import be.crismartens.financetracker.dto.AccountInfoDTO;
 import be.crismartens.financetracker.model.AccountInfo;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.AccountRepository;
 import be.crismartens.financetracker.repository.UserRepository;
+import be.crismartens.financetracker.service.AccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

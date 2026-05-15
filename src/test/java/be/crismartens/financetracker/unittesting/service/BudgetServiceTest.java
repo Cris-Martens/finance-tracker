@@ -1,4 +1,4 @@
-package be.crismartens.financetracker.service;
+package be.crismartens.financetracker.unittesting.service;
 
 import be.crismartens.financetracker.CategoryBudgetNotFoundException;
 import be.crismartens.financetracker.CategoryNotFoundException;
@@ -8,6 +8,7 @@ import be.crismartens.financetracker.model.CategoryBudget;
 import be.crismartens.financetracker.repository.BudgetRepository;
 import be.crismartens.financetracker.repository.CategoryRepository;
 import be.crismartens.financetracker.repository.UserRepository;
+import be.crismartens.financetracker.service.BudgetService;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
