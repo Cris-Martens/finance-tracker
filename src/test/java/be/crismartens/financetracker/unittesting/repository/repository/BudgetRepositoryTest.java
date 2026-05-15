@@ -1,8 +1,9 @@
-package be.crismartens.financetracker.repository;
+package be.crismartens.financetracker.unittesting.repository.repository;
 
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.CategoryBudget;
+import be.crismartens.financetracker.repository.BudgetRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

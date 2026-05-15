@@ -1,4 +1,4 @@
-package be.crismartens.financetracker.service;
+package be.crismartens.financetracker.unittesting.service;
 
 import be.crismartens.financetracker.CategoryNotFoundException;
 import be.crismartens.financetracker.ExpenseNotFoundException;
@@ -10,6 +10,7 @@ import be.crismartens.financetracker.model.Expense;
 import be.crismartens.financetracker.repository.CategoryRepository;
 import be.crismartens.financetracker.repository.ExpensesRepository;
 import be.crismartens.financetracker.repository.UserRepository;
+import be.crismartens.financetracker.service.ExpensesService;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

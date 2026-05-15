@@ -1,4 +1,4 @@
-package be.crismartens.financetracker.controller;
+package be.crismartens.financetracker.unittesting.controller;
 
 import be.crismartens.financetracker.EmptyExpenseException;
 import be.crismartens.financetracker.ExpenseNotFoundException;
@@ -113,7 +113,7 @@ class ExpensesControllerTest {
 
     @Test
     @WithMockUser(username = "testUser", authorities = "ROLE_USER")
-    @DisplayName("GET all expenses per user - no exppenses")
+    @DisplayName("GET all expenses per user - no expenses")
     void getAllExpensesPerUserNoExpenses() throws Exception {
         // Arrange
         List<ExpenseDTO> expenses = new ArrayList<>();

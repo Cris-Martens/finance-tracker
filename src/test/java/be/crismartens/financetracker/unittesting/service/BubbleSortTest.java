@@ -1,6 +1,7 @@
-package be.crismartens.financetracker.service;
+package be.crismartens.financetracker.unittesting.service;
 
 import be.crismartens.financetracker.dto.BudgetAndSpendDTO;
+import be.crismartens.financetracker.service.BubbleSort;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

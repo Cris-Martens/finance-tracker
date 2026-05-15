@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -39,7 +40,7 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard/totalsaved")
-    public Double getTotalSavedAmount(@AuthenticationPrincipal UserDetails principal) {
+    public Double getTotalSavedAmount(@AuthenticationPrincipal UserDetails principal) throws ExecutionException, InterruptedException {
         return dashboardService.getSavedAmount(principal);
     }
 }
