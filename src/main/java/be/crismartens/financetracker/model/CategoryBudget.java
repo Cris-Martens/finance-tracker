@@ -2,6 +2,8 @@ package be.crismartens.financetracker.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "budget")
 public class CategoryBudget {
@@ -49,5 +51,17 @@ public class CategoryBudget {
     }
     public void setAppUser(AppUser appUser) {
         this.appUser = appUser;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        CategoryBudget budget = (CategoryBudget) o;
+        return id == budget.id && Double.compare(amount, budget.amount) == 0 && Objects.equals(category, budget.category) && Objects.equals(appUser, budget.appUser);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, amount, category, appUser);
     }
 }

@@ -17,5 +17,8 @@ public interface AccountRepository extends CrudRepository<AccountInfo, Long> {
             """)
     Optional<AccountInfo> findByAppUser_Id(@Param("userId") Long userId);
 
-    Double findMonthlyIncomeByAppUser_Id(Long userId);
+    @Query("""
+            select a.monthlyIncome from AccountInfo a where a.appUser.id = :userId
+            """)
+    Double findMonthlyIncomeByAppUser_Id(@Param("userId") Long userId);
 }

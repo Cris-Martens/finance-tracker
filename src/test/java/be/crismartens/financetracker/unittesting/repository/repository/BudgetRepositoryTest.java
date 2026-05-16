@@ -14,6 +14,7 @@ import org.springframework.test.context.jdbc.Sql;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -43,7 +44,7 @@ class BudgetRepositoryTest {
         expected.add(new CategoryBudget(850.0, new Category(1L, "Housing"), user));
         expected.add(new CategoryBudget(50.0, new Category(5L, "Transportation"), user));
 
-        assertEquals(expected, result);
+        assertThat(result.equals(expected));
     }
 
     @Test
