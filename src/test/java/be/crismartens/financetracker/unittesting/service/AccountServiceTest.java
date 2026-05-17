@@ -197,7 +197,7 @@ class AccountServiceTest {
         assertEquals("John", result.getFirstName());
         assertEquals("Doe", result.getLastName());
         assertEquals("Belgium", result.getCountry());
-        assertEquals(new BigDecimal("2400.00"), result.getMonthlyIncome());
+        assertEquals(2400.0, result.getMonthlyIncome());
         verify(accountRepository, times(1)).findByAppUser_Id(1L);
     }
 

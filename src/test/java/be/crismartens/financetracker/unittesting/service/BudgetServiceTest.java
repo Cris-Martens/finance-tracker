@@ -185,11 +185,27 @@ class BudgetServiceTest {
     @DisplayName("POST budgets - user does NOT exist")
     void postBudgetsUserDoesNotExist() {
         // Arrange
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.empty());
+        principal = new UserDetails() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return List.of();
+            }
+
+            @Override
+            public @Nullable String getPassword() {
+                return "";
+            }
+
+            @Override
+            public String getUsername() {
+                return "nonexistent";
+            }
+        };
+        when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(UsernameNotFoundException.class, () -> budgetService.saveBudgets(principal, budgets));
-        verify(userRepository, times(1)).findByUsername("testUser");
+        verify(userRepository, times(1)).findByUsername("nonexistent");
         verify(budgetRepository, never()).save(any());
     }
 
@@ -215,19 +231,8 @@ class BudgetServiceTest {
         budgets.put("Category 2", -200.0);
 
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(appUser));
-        when(categoryRepository.findByName(anyString())).thenAnswer(invocation -> {
-            String name = invocation.getArgument(0);
-            return switch (name) {
-                case "Category 1" -> Optional.of(category1);
-                case "Category 2" -> Optional.of(category2);
-                default -> Optional.empty();
-            };
-        });
 
-        // Act
-        budgetService.saveBudgets(principal, budgets);
-
-        // Assert
+        // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> budgetService.saveBudgets(principal, budgets));
         verify(userRepository, times(1)).findByUsername("testUser");
         verify(budgetRepository, never()).save(any());
@@ -243,24 +248,12 @@ class BudgetServiceTest {
         budgets.put("Category 2", 400.0);
 
         when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
-        when(categoryRepository.findByName(anyString())).thenAnswer(invocation -> {
-            String name = invocation.getArgument(0);
-            return switch (name) {
-                case "Category 1" -> Optional.of(category1);
-                case "Category 2" -> Optional.of(category2);
-                default -> Optional.empty();
-            };
-        });
-        when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(eq(1L), any(Category.class).getId()))
-                .thenAnswer(invocation -> {
-                    Category category = invocation.getArgument(0);
-                    return switch (category.getName()) {
-                        case "Category 1" -> budget1;
-                        case "Category 2" -> budget2;
-                        default -> Optional.empty();
-                    };
-                });
-
+        when(categoryRepository.findIdByName("Category 1")).thenReturn(1L);
+        when(categoryRepository.findIdByName("Category 2")).thenReturn(2L);
+        when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L))
+                .thenReturn(budget1);
+        when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 2L))
+                .thenReturn(budget2);
 
         ArgumentCaptor<CategoryBudget> budgetCaptor = ArgumentCaptor.forClass(CategoryBudget.class);
 
@@ -268,10 +261,11 @@ class BudgetServiceTest {
         budgetService.updateBudgets(principal, budgets);
 
         // Assert
-        verify(userRepository, times(1)).findByUsername("testUser");
-        verify(categoryRepository, times(2)).findByName(anyString());
-        verify(budgetRepository, times(2))
-                .getCategoryBudgetByAppUser_IdAndCategory_Id(eq(1L), any(Category.class).getId());
+        verify(userRepository, times(1)).findIdByUsername("testUser");
+        verify(categoryRepository, times(1)).findIdByName("Category 1");
+        verify(categoryRepository, times(1)).findIdByName("Category 2");
+        verify(budgetRepository, times(1)).getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L);
+        verify(budgetRepository, times(1)).getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 2L);
         verify(budgetRepository, times(2)).save(budgetCaptor.capture());
 
         List<CategoryBudget> savedBudgets = budgetCaptor.getAllValues();
@@ -288,21 +282,21 @@ class BudgetServiceTest {
     void putBudgetsOneItemSuccess() {
         // Arrange
         when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
-        when(categoryRepository.findByName("Category 1")).thenReturn(Optional.of(category1));
-        when(budgetRepository.findById(category1.getId())).thenReturn(Optional.of(budget1));
+        when(categoryRepository.findIdByName(anyString())).thenReturn(1L);
+        when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L)).thenReturn(budget1);
 
-        budgets.put("Category 1", 300.0);
-        budgets.remove("Category 2");
+        Map<String, Double> oneBudget = new LinkedHashMap<>();
+        oneBudget.put("Category 1", 300.0);
 
         ArgumentCaptor<CategoryBudget> budgetCaptor = ArgumentCaptor.forClass(CategoryBudget.class);
 
         // Act
-        budgetService.updateBudgets(principal, budgets);
+        budgetService.updateBudgets(principal, oneBudget);
 
         // Assert
-        verify(userRepository, times(1)).findByUsername("testUser");
-        verify(categoryRepository, times(1)).findByName(anyString());
-        verify(budgetRepository, times(1)).findById(category1.getId());
+        verify(userRepository, times(1)).findIdByUsername("testUser");
+        verify(categoryRepository, times(1)).findIdByName(anyString());
+        verify(budgetRepository, times(1)).getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L);
         verify(budgetRepository, times(1)).save(budgetCaptor.capture());
 
         List<CategoryBudget> savedBudgets = budgetCaptor.getAllValues();
@@ -316,24 +310,41 @@ class BudgetServiceTest {
     @DisplayName("PUT budget - user does NOT exist")
     void putBudgetsUserDoesNotExist() {
         // Arrange
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.empty());
+        principal = new UserDetails() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return List.of();
+            }
+
+            @Override
+            public @Nullable String getPassword() {
+                return "";
+            }
+
+            @Override
+            public String getUsername() {
+                return "nonexistent";
+            }
+        };
+        when(userRepository.findIdByUsername("nonexistent")).thenReturn(Optional.empty());
 
         // Act @ Assert
         assertThrows(UsernameNotFoundException.class, () -> budgetService.updateBudgets(principal, budgets));
-        verify(userRepository, times(1)).findByUsername("testUser");
+        verify(userRepository, times(1)).findIdByUsername("nonexistent");
         verify(budgetRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("POST budget - category does NOT exist")
+    @DisplayName("PUT budget - category does NOT exist")
     void putBudgetsCategoryDoesNotExist() {
         // Arrange
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(appUser));
-        when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
+        when(categoryRepository.findIdByName(anyString())).thenReturn(null);
 
         // Act & Assert
         assertThrows(CategoryNotFoundException.class, () -> budgetService.updateBudgets(principal, budgets));
-        verify(userRepository, times(1)).findByUsername("testUser");
+        verify(userRepository, times(1)).findIdByUsername("testUser");
+        verify(categoryRepository, times(1)).findIdByName(anyString());
         verify(budgetRepository, never()).save(any());
     }
 
@@ -342,14 +353,13 @@ class BudgetServiceTest {
     void putBudgetsNullValue() {
         // Arrange
         Map<String, Double> nullBudgets = new HashMap<>();
+        nullBudgets.put("Category 1", null);
 
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(appUser));
+        when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
 
-        // Act
-        budgetService.updateBudgets(principal, nullBudgets);
-
-        // Assert
-        verify(userRepository, times(1)).findByUsername("testUser");
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> budgetService.updateBudgets(principal, nullBudgets));
+        verify(userRepository, times(1)).findIdByUsername("testUser");
         verify(categoryRepository, never()).findByName(anyString());
         verify(budgetRepository, never()).save(any());
     }
@@ -358,24 +368,19 @@ class BudgetServiceTest {
     @DisplayName("PUT budget - update to negative value")
     void putBudgetsNegativeValue() {
         // Arrange
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(appUser));
-        when(categoryRepository.findByName("Category 1")).thenReturn(Optional.of(category1));
-        when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(eq(1L), any(Category.class).getId()))
-                .thenReturn(budget1);
+        when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(eq(1L)));
 
-        budgets.put("Category 1", -300.0);
-        budgets.remove("Category 2");
+        budgets =  new LinkedHashMap<>();
+        budgets.put("Category 1", -100.0);
 
         ArgumentCaptor<CategoryBudget> budgetCaptor = ArgumentCaptor.forClass(CategoryBudget.class);
 
-        // Act
-        budgetService.updateBudgets(principal, budgets);
-
-        // Assert
-        verify(userRepository, times(1)).findByUsername("testUser");
-        verify(categoryRepository, times(1)).findByName(anyString());
-        verify(budgetRepository, times(1))
-                .getCategoryBudgetByAppUser_IdAndCategory_Id(eq(1L), any(Category.class).getId());
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> budgetService.updateBudgets(principal, budgets));
+        verify(userRepository, times(1)).findIdByUsername("testUser");
+        verify(categoryRepository, never()).findByName(anyString());
+        verify(budgetRepository, never())
+                .getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L);
         verify(budgetRepository, never()).save(budgetCaptor.capture());
 
         List<CategoryBudget> savedBudgets = budgetCaptor.getAllValues();
@@ -386,19 +391,19 @@ class BudgetServiceTest {
     @DisplayName("PUT budget - budget does NOT exist")
     void putBudgetsUserDoesNotOwnBudget() {
         // Arrange
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(appUser));
-        when(categoryRepository.findByName("Category 1")).thenReturn(Optional.of(category1));
-        when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(eq(1L), any(Category.class).getId()))
+        when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
+        when(categoryRepository.findIdByName("Category 1")).thenReturn(1L);
+        when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L))
                 .thenReturn(null);
 
         budgets.remove("Category 2");
 
         // Act & Assert
         assertThrows(CategoryBudgetNotFoundException.class, () -> budgetService.updateBudgets(principal, budgets));
-        verify(userRepository, times(1)).findByUsername("testUser");
-        verify(categoryRepository, times(1)).findByName(anyString());
+        verify(userRepository, times(1)).findIdByUsername("testUser");
+        verify(categoryRepository, times(1)).findIdByName("Category 1");
         verify(budgetRepository, times(1))
-                .getCategoryBudgetByAppUser_IdAndCategory_Id(eq(1L), any(Category.class).getId());
+                .getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L);
         verify(budgetRepository, never()).save(any());
     }
 
@@ -410,7 +415,7 @@ class BudgetServiceTest {
         // Arrange
         when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
         when(categoryRepository.findIdByName("Category 1")).thenReturn(category1.getId());
-        when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(eq(1L), any(Category.class).getId()))
+        when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(eq(1L), anyLong()))
                 .thenReturn(budget1);
 
         // Act
@@ -420,7 +425,7 @@ class BudgetServiceTest {
         verify(userRepository, times(1)).findIdByUsername("testUser");
         verify(categoryRepository, times(1)).findIdByName("Category 1");
         verify(budgetRepository, times(1))
-                .getCategoryBudgetByAppUser_IdAndCategory_Id(eq(1L), any(Category.class).getId());
+                .getCategoryBudgetByAppUser_IdAndCategory_Id(eq(1L), anyLong());
         verify(budgetRepository, times(1)).delete(any(CategoryBudget.class));
     }
 
@@ -428,6 +433,22 @@ class BudgetServiceTest {
     @DisplayName("DELETE budget - user does NOT exist")
     void deleteBudgetsUserDoesNotExist() {
         // Arrange
+        principal = new UserDetails() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return List.of();
+            }
+
+            @Override
+            public @Nullable String getPassword() {
+                return "";
+            }
+
+            @Override
+            public String getUsername() {
+                return "nonexistent";
+            }
+        };
         when(userRepository.findIdByUsername("nonexistent")).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -472,13 +493,12 @@ class BudgetServiceTest {
     void deleteBudgetIgnoresNullValue() {
         // Arrange
         when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
-        when(categoryRepository.findIdByName(null)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(CategoryBudgetNotFoundException.class,
-                () -> budgetService.deleteBudgets(principal, "Category 1"));
+        assertThrows(IllegalArgumentException.class,
+                () -> budgetService.deleteBudgets(principal, null));
         verify(userRepository, times(1)).findIdByUsername("testUser");
-        verify(categoryRepository, times(1)).findIdByName(null);
+        verify(categoryRepository, never()).findIdByName(anyString());
         verify(budgetRepository, never()).delete(any(CategoryBudget.class));
     }
 }
