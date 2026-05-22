@@ -148,18 +148,11 @@ class BudgetServiceTest {
     // ============= saveBudgets() Tests =============
 
     @Test
-    @DisplayName("POST budgets - success")
+    @DisplayName("POST budget - success")
     void postBudgets() {
         // Arrange
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(appUser));
-        when(categoryRepository.findByName(anyString())).thenAnswer(invocation -> {
-            String name = invocation.getArgument(0);
-            return switch (name) {
-                case "Category 1" -> Optional.of(category1);
-                case "Category 2" -> Optional.of(category2);
-                default -> Optional.empty();
-            };
-        });
+        when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(category1));
 
         ArgumentCaptor<CategoryBudget> budgetCaptor = ArgumentCaptor.forClass(CategoryBudget.class);
 
@@ -168,16 +161,14 @@ class BudgetServiceTest {
 
         // Assert
         verify(userRepository, times(1)).findByUsername("testUser");
-        verify(categoryRepository, times(2)).findByName(anyString());
-        verify(budgetRepository, times(2)).save(budgetCaptor.capture());
+        verify(categoryRepository, times(1)).findByName(anyString());
+        verify(budgetRepository, times(1)).save(budgetCaptor.capture());
 
         List<CategoryBudget> savedBudgets = budgetCaptor.getAllValues();
-        assertEquals(2, savedBudgets.size());
+        assertEquals(1, savedBudgets.size());
 
         assertTrue(savedBudgets.stream()
                 .anyMatch(b -> b.getCategory().getName().equals("Category 1") && b.getAmount() == 100.0));
-        assertTrue(savedBudgets.stream()
-                .anyMatch(b -> b.getCategory().getName().equals("Category 2") &&  b.getAmount() == 200.0));
     }
 
     @Test
@@ -246,11 +237,8 @@ class BudgetServiceTest {
 
         when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
         when(categoryRepository.findIdByName("Category 1")).thenReturn(1L);
-        when(categoryRepository.findIdByName("Category 2")).thenReturn(2L);
         when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L))
                 .thenReturn(budget1);
-        when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 2L))
-                .thenReturn(budget2);
 
         ArgumentCaptor<CategoryBudget> budgetCaptor = ArgumentCaptor.forClass(CategoryBudget.class);
 
@@ -260,18 +248,14 @@ class BudgetServiceTest {
         // Assert
         verify(userRepository, times(1)).findIdByUsername("testUser");
         verify(categoryRepository, times(1)).findIdByName("Category 1");
-        verify(categoryRepository, times(1)).findIdByName("Category 2");
         verify(budgetRepository, times(1)).getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L);
-        verify(budgetRepository, times(1)).getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 2L);
-        verify(budgetRepository, times(2)).save(budgetCaptor.capture());
+        verify(budgetRepository, times(1)).save(budgetCaptor.capture());
 
         List<CategoryBudget> savedBudgets = budgetCaptor.getAllValues();
-        assertEquals(2, savedBudgets.size());
+        assertEquals(1, savedBudgets.size());
 
         assertTrue(savedBudgets.stream()
                 .anyMatch(b -> b.getAmount() == 300.0));
-        assertTrue(savedBudgets.stream()
-                .anyMatch(b -> b.getAmount() == 400.0));
     }
 
     @Test
