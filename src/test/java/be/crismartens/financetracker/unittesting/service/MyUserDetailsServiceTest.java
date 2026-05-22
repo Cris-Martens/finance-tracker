@@ -2,9 +2,9 @@ package be.crismartens.financetracker.unittesting.service;
 
 import be.crismartens.financetracker.InvalidUserException;
 import be.crismartens.financetracker.auth.MyUserDetailsService;
+import be.crismartens.financetracker.dto.AppUserDTO;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.UserRepository;
-import be.crismartens.financetracker.response.UserResponse;
 import be.crismartens.financetracker.service.UserValidationService;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,8 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -80,10 +78,10 @@ class MyUserDetailsServiceTest {
         when(userRepository.findByUsername("example@test.com")).thenReturn(Optional.ofNullable(appUser));
 
         // Act
-        ResponseEntity<UserResponse> result = userDetailsService.registerUser(appUser);
+        AppUserDTO result = userDetailsService.registerUser(appUser);
 
         // Assert
-        assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
+        assertEquals(new AppUserDTO(appUser), result);
         verify(userRepository, times(1)).findByUsername("example@test.com");
         verify(userRepository, never()).save(any());
 
@@ -126,13 +124,10 @@ class MyUserDetailsServiceTest {
         when(userValidationService.isValid(newUser)).thenReturn(true);
 
         // Act
-        ResponseEntity<UserResponse> response = userDetailsService.registerUser(newUser);
+        AppUserDTO result = userDetailsService.registerUser(newUser);
 
         // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("New User saved: ", response.getBody().getMessage());
-        assertEquals("example@test.com",  response.getBody().getUsername());
+        assertEquals(new AppUserDTO(newUser), result);
         verify(userRepository, times(1)).findByUsername("example@test.com");
         verify(userRepository, times(1)).save(any(AppUser.class));
     }

@@ -1,10 +1,7 @@
 package be.crismartens.financetracker.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Cascade;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -46,5 +43,11 @@ public class AppUser implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(authority));
+    }
+
+    public AppUser(String username, String password, String authority) {
+        this.username = username;
+        this.password = password;
+        this.authority = authority;
     }
 }

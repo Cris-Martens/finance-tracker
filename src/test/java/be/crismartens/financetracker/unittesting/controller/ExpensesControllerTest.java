@@ -2,6 +2,7 @@ package be.crismartens.financetracker.unittesting.controller;
 
 import be.crismartens.financetracker.EmptyExpenseException;
 import be.crismartens.financetracker.ExpenseNotFoundException;
+import be.crismartens.financetracker.InvalidExpenseException;
 import be.crismartens.financetracker.dto.ExpenseDTO;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.Expense;
@@ -192,20 +193,43 @@ class ExpensesControllerTest {
     @DisplayName("POST expense - success")
     void addExpenseAuthorised() throws Exception {
         // Arrange
-        doNothing().when(expensesService).addExpense(any(Expense.class), any());
-
         Expense testExpense = new Expense();
         testExpense.setExpenseDate(LocalDate.parse("2026-04-28"));
         testExpense.setAmount(91.78);
         testExpense.setCategory(new Category("Utilities"));
         testExpense.setDescription("Electricity");
 
+        when(expensesService.addExpense(any(Expense.class), any()))
+                .thenReturn(new ExpenseDTO(testExpense));
+
         // Act & Assert
         mockMvc.perform(post("/api/v1/user/expenses")
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testExpense))
                 .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
+
+        verify(expensesService, times(1)).addExpense(any(Expense.class), any());
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("POST incomplete expense")
+    void addIncompleteExpense() throws Exception {
+        // Arrange
+        Expense testExpense = new Expense();
+        testExpense.setExpenseDate(LocalDate.parse("2026-04-28"));
+        testExpense.setDescription("Electricity");
+
+        doThrow(InvalidExpenseException.class)
+                .when(expensesService.addExpense(any(Expense.class), any()));
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/user/expenses")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testExpense))
+                .with(csrf()))
+                .andExpect(status().isBadRequest());
 
         verify(expensesService, times(1)).addExpense(any(Expense.class), any());
     }
@@ -215,11 +239,10 @@ class ExpensesControllerTest {
     @DisplayName("POST empty expense authorized")
     void addExpenseAuthorisedEmpty() throws Exception {
         // Arrange
-        doThrow(EmptyExpenseException.class)
-                .when(expensesService).addExpense(any(Expense.class), any());
-
         Expense testExpense = new Expense();
 
+        doThrow(EmptyExpenseException.class)
+                .when(expensesService).addExpense(any(Expense.class), any());
         // Act & Assert
         mockMvc.perform(post("/api/v1/user/expenses")
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
@@ -233,8 +256,6 @@ class ExpensesControllerTest {
     @DisplayName("POST expense - unauthorized")
     void addExpenseUnauthorized() throws Exception {
         // Arrange
-        doNothing().when(expensesService).addExpense(any(Expense.class), any());
-
         Expense testExpense = new Expense();
         testExpense.setExpenseDate(LocalDate.parse("2026-04-28"));
         testExpense.setAmount(91.78);
@@ -257,12 +278,13 @@ class ExpensesControllerTest {
     @DisplayName("PUT update expense - success")
     void updateExpenseSuccess() throws Exception {
         // Arrange
-        doNothing().when(expensesService).updateExpense(any(Expense.class), any());
-
         Expense updateExpense = new Expense();
         updateExpense.setId(1L);
         updateExpense.setExpenseDate(LocalDate.parse("2026-04-29"));
         updateExpense.setAmount(64.95);
+
+        when(expensesService.updateExpense(any(Expense.class), any()))
+                .thenReturn(new ExpenseDTO(updateExpense));
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/user/expenses")
@@ -278,7 +300,7 @@ class ExpensesControllerTest {
     @DisplayName("PUT expense - not found")
     void updateExpenseNotFound() throws Exception {
         // Arrange
-        doThrow(new ExpenseNotFoundException("Expense not found"))
+        doThrow(new ExpenseNotFoundException(1L))
                 .when(expensesService).updateExpense(any(Expense.class), any());
 
         Expense updateExpense = new Expense();
@@ -301,9 +323,10 @@ class ExpensesControllerTest {
     @DisplayName("PUT expense -  empty values")
     void updateExpenseEmptyValues() throws Exception {
         // Arrange
-        doNothing().when(expensesService).addExpense(any(Expense.class), any());
+        ExpenseDTO updateExpense = new ExpenseDTO();
 
-        Expense updateExpense = new Expense();
+        when(expensesService.addExpense(any(Expense.class), any()))
+                .thenReturn(updateExpense);
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/user/expenses")
@@ -319,8 +342,6 @@ class ExpensesControllerTest {
     @DisplayName("PUT expense - unauthorised")
     void updateExpenseUnauthorized() throws Exception {
         // Arrange
-        doNothing().when(expensesService).addExpense(any(Expense.class), any());
-
         Expense updateExpense = new Expense();
         updateExpense.setId(1L);
         updateExpense.setExpenseDate(LocalDate.parse("2026-04-29"));
@@ -352,7 +373,7 @@ class ExpensesControllerTest {
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(deleteExpense))
                 .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         verify(expensesService, times(1)).deleteExpense(any(Expense.class), any());
     }
 
@@ -361,7 +382,7 @@ class ExpensesControllerTest {
     @DisplayName("DELETE expense - not found")
     void deleteExpenseNotFound() throws Exception {
         // Arrange
-        doThrow(new ExpenseNotFoundException("Expense not found"))
+        doThrow(new ExpenseNotFoundException(5L))
                 .when(expensesService).deleteExpense(any(Expense.class), any());
 
         Expense deleteExpense = new Expense();

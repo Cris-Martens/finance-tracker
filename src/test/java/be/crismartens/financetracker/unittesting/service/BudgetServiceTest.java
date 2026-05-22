@@ -2,7 +2,9 @@ package be.crismartens.financetracker.unittesting.service;
 
 import be.crismartens.financetracker.CategoryBudgetNotFoundException;
 import be.crismartens.financetracker.CategoryNotFoundException;
+import be.crismartens.financetracker.dto.CategoryBudgetDTO;
 import be.crismartens.financetracker.model.AppUser;
+import be.crismartens.financetracker.model.BudgetRequestBody;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.CategoryBudget;
 import be.crismartens.financetracker.repository.BudgetRepository;
@@ -44,7 +46,7 @@ class BudgetServiceTest {
 
     UserDetails principal;
 
-    Map<String, Double> budgets;
+    BudgetRequestBody budgets;
 
     CategoryBudget budget1;
     CategoryBudget budget2;
@@ -95,9 +97,7 @@ class BudgetServiceTest {
         budget2.setAmount(200.0);
         budget2.setAppUser(appUser);
 
-        budgets = new HashMap<>();
-        budgets.put(category1.getName(), 100.0);
-        budgets.put(category2.getName(), 200.0);
+        budgets = new BudgetRequestBody("Category 1", 100.0);
     }
 
     // ============= getAllBudgets() Tests =============
@@ -110,11 +110,10 @@ class BudgetServiceTest {
         when(budgetRepository.getCategoryBudgetByAppUser_Id(1L)).thenReturn(List.of(budget1, budget2));
 
         // Act
-        Map<String, Double> result = budgetService.getAllBudgets(principal);
+        List<CategoryBudgetDTO> result = budgetService.getAllBudgets(principal);
 
         // Assert
-        assertEquals(budgets.get("Category 1"), result.get("Category 1"));
-        assertEquals(budgets.get("Category 2"), result.get("Category 2"));
+        assertEquals(budgets.getAmount(), result.get(0).getAmount());
 
         verify(userRepository, times(1)).findIdByUsername("testUser");
         verify(budgetRepository, times(1)).getCategoryBudgetByAppUser_Id(1L);
@@ -128,7 +127,7 @@ class BudgetServiceTest {
         when(budgetRepository.getCategoryBudgetByAppUser_Id(1L)).thenReturn(Collections.emptyList());
 
         // Act
-        Map<String, Double> result = budgetService.getAllBudgets(principal);
+        List<CategoryBudgetDTO> result = budgetService.getAllBudgets(principal);
 
         // Assert
         assertNotNull(result);
@@ -227,8 +226,7 @@ class BudgetServiceTest {
     @DisplayName("POST budget - negative amount set")
     void postBudgetsNegativeAmount() {
         // Arrange
-        budgets.put("Category 1", -100.0);
-        budgets.put("Category 2", -200.0);
+        budgets.setAmount(-100.0);
 
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(appUser));
 
@@ -244,8 +242,7 @@ class BudgetServiceTest {
     @DisplayName("PUT budget - update amounts - success")
     void putBudgets() {
         // Arrange
-        budgets.put("Category 1", 300.0);
-        budgets.put("Category 2", 400.0);
+        budgets.setAmount(300.0);
 
         when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
         when(categoryRepository.findIdByName("Category 1")).thenReturn(1L);
@@ -275,35 +272,6 @@ class BudgetServiceTest {
                 .anyMatch(b -> b.getAmount() == 300.0));
         assertTrue(savedBudgets.stream()
                 .anyMatch(b -> b.getAmount() == 400.0));
-    }
-
-    @Test
-    @DisplayName("PUT budget - update one item - success")
-    void putBudgetsOneItemSuccess() {
-        // Arrange
-        when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
-        when(categoryRepository.findIdByName(anyString())).thenReturn(1L);
-        when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L)).thenReturn(budget1);
-
-        Map<String, Double> oneBudget = new LinkedHashMap<>();
-        oneBudget.put("Category 1", 300.0);
-
-        ArgumentCaptor<CategoryBudget> budgetCaptor = ArgumentCaptor.forClass(CategoryBudget.class);
-
-        // Act
-        budgetService.updateBudgets(principal, oneBudget);
-
-        // Assert
-        verify(userRepository, times(1)).findIdByUsername("testUser");
-        verify(categoryRepository, times(1)).findIdByName(anyString());
-        verify(budgetRepository, times(1)).getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L);
-        verify(budgetRepository, times(1)).save(budgetCaptor.capture());
-
-        List<CategoryBudget> savedBudgets = budgetCaptor.getAllValues();
-        assertEquals(1, savedBudgets.size());
-
-        assertTrue(savedBudgets.stream()
-                .anyMatch(b -> b.getAmount() == 300.0));
     }
 
     @Test
@@ -352,13 +320,12 @@ class BudgetServiceTest {
     @DisplayName("PUT budget - update with null value")
     void putBudgetsNullValue() {
         // Arrange
-        Map<String, Double> nullBudgets = new HashMap<>();
-        nullBudgets.put("Category 1", null);
+        BudgetRequestBody nullBudget = new BudgetRequestBody("NullCategory", null);
 
         when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> budgetService.updateBudgets(principal, nullBudgets));
+        assertThrows(IllegalArgumentException.class, () -> budgetService.updateBudgets(principal, nullBudget));
         verify(userRepository, times(1)).findIdByUsername("testUser");
         verify(categoryRepository, never()).findByName(anyString());
         verify(budgetRepository, never()).save(any());
@@ -370,8 +337,7 @@ class BudgetServiceTest {
         // Arrange
         when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(eq(1L)));
 
-        budgets =  new LinkedHashMap<>();
-        budgets.put("Category 1", -100.0);
+        budgets.setAmount(-100.0);
 
         ArgumentCaptor<CategoryBudget> budgetCaptor = ArgumentCaptor.forClass(CategoryBudget.class);
 
@@ -395,8 +361,6 @@ class BudgetServiceTest {
         when(categoryRepository.findIdByName("Category 1")).thenReturn(1L);
         when(budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(1L, 1L))
                 .thenReturn(null);
-
-        budgets.remove("Category 2");
 
         // Act & Assert
         assertThrows(CategoryBudgetNotFoundException.class, () -> budgetService.updateBudgets(principal, budgets));

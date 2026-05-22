@@ -2,8 +2,8 @@ package be.crismartens.financetracker;
 
 public class CategoryBudgetNotFoundException extends RuntimeException {
 
-    public CategoryBudgetNotFoundException(String message) {
-        super(message);
+    public CategoryBudgetNotFoundException(String category) {
+        super("budget for category " + category + " not found");
     }
 
     public CategoryBudgetNotFoundException(String message, Throwable cause) {

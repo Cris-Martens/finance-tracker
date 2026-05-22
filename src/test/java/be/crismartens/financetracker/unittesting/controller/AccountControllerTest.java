@@ -99,7 +99,7 @@ class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("Get accountindo - unauthorized")
+    @DisplayName("GET accountindo - unauthorized")
     void getAccountInfoUnauthorized() throws Exception {
         // Act & Assert
         mockMvc.perform(get("/api/v1/accountinfo"))
@@ -113,16 +113,17 @@ class AccountControllerTest {
     @DisplayName("POST accountinfo - success")
     void postAccountInfoSuccess() throws Exception {
         // Arrange
-        doNothing().when(accountService).upsertAccountInfo(any(AccountInfo.class), any());
+        when(accountService.addAccountInfo(any(AccountInfo.class), any()))
+                .thenReturn(new AccountInfoDTO(accountInfo));
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/accountinfo")
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))
                 .content(objectMapper.writeValueAsString(accountInfo))
                 .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
-        verify(accountService, times(1)).upsertAccountInfo(any(AccountInfo.class), any());
+        verify(accountService, times(1)).addAccountInfo(any(AccountInfo.class), any());
     }
 
     @Test
@@ -132,24 +133,22 @@ class AccountControllerTest {
         // Arrange
         AccountInfo postAccountInfo = new AccountInfo();
 
-        doNothing().when(accountService).upsertAccountInfo(any(AccountInfo.class), any());
+        when(accountService.addAccountInfo(any(AccountInfo.class), any()))
+                .thenReturn(new AccountInfoDTO(postAccountInfo));
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/accountinfo")
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))
                 .content(objectMapper.writeValueAsString(postAccountInfo))
                 .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
-        verify(accountService, times(1)).upsertAccountInfo(any(AccountInfo.class), any());
+        verify(accountService, times(1)).addAccountInfo(any(AccountInfo.class), any());
     }
 
     @Test
     @DisplayName("POST accountinfo - unauthorized")
     void postAccountInfoUnauthorized() throws Exception {
-        // Arrange
-        doNothing().when(accountService).upsertAccountInfo(any(AccountInfo.class), any());
-
         // Act & Assert
         mockMvc.perform(post("/api/v1/accountinfo")
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))
@@ -157,7 +156,7 @@ class AccountControllerTest {
                 .with(csrf()))
                 .andExpect(status().isUnauthorized());
 
-        verify(accountService, never()).upsertAccountInfo(any(AccountInfo.class), any());
+        verify(accountService, never()).addAccountInfo(any(AccountInfo.class), any());
     }
 
     // =========== PUT /api/v1/accountinfo ===========
@@ -167,7 +166,8 @@ class AccountControllerTest {
     @DisplayName("PUT accountinfo - success")
     void putAccountInfoSuccess() throws Exception {
         // Arrange
-        doNothing().when(accountService).upsertAccountInfo(any(AccountInfo.class), any());
+        when(accountService.updateAccountInfo(any(AccountInfo.class), any()))
+                .thenReturn(new AccountInfoDTO(accountInfo));
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/accountinfo")
@@ -176,7 +176,7 @@ class AccountControllerTest {
                 .with(csrf()))
                 .andExpect(status().isOk());
 
-        verify(accountService, times(1)).upsertAccountInfo(any(AccountInfo.class), any());
+        verify(accountService, times(1)).updateAccountInfo(any(AccountInfo.class), any());
     }
 
     @Test
@@ -184,7 +184,8 @@ class AccountControllerTest {
     @DisplayName("PUT accountinfo - not found")
     void putAccountInfoNotFound() throws Exception {
         // Arrange
-        doThrow(ExpenseNotFoundException.class).when(accountService).upsertAccountInfo(any(AccountInfo.class), any());
+        doThrow(ExpenseNotFoundException.class).when(accountService)
+                .updateAccountInfo(any(AccountInfo.class), any());
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/accountinfo")
@@ -193,7 +194,7 @@ class AccountControllerTest {
                 .with(csrf()))
                 .andExpect(status().isNotFound());
 
-        verify(accountService, times(1)).upsertAccountInfo(any(AccountInfo.class), any());
+        verify(accountService, times(1)).updateAccountInfo(any(AccountInfo.class), any());
     }
 
     @Test
@@ -203,7 +204,8 @@ class AccountControllerTest {
         // Arrange
         AccountInfo putAccountInfo = new AccountInfo();
 
-        doNothing().when(accountService).upsertAccountInfo(any(AccountInfo.class), any());
+        when(accountService.updateAccountInfo(any(AccountInfo.class), any()))
+                .thenReturn(new AccountInfoDTO(putAccountInfo));
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/accountinfo")
@@ -212,15 +214,12 @@ class AccountControllerTest {
                 .with(csrf()))
                 .andExpect(status().isOk());
 
-        verify(accountService, times(1)).upsertAccountInfo(any(AccountInfo.class), any());
+        verify(accountService, times(1)).updateAccountInfo(any(AccountInfo.class), any());
     }
 
     @Test
     @DisplayName("PUT accountinfo - unauthorized")
     void putAccountInfoUnauthorized() throws Exception {
-        // Arrange
-        doNothing().when(accountService).upsertAccountInfo(any(AccountInfo.class), any());
-
         // Act & Assert
         mockMvc.perform(put("/api/v1/accountinfo")
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))
@@ -228,7 +227,7 @@ class AccountControllerTest {
                 .with(csrf()))
                 .andExpect(status().isUnauthorized());
 
-        verify(accountService, never()).upsertAccountInfo(any(AccountInfo.class), any());
+        verify(accountService, never()).updateAccountInfo(any(AccountInfo.class), any());
     }
 
     // =========== DELETE /api/v1/accountinfo ===========
@@ -238,14 +237,14 @@ class AccountControllerTest {
     @DisplayName("DELETE accountinfo - success")
     void deleteAccountInfoSuccess() throws Exception {
         // Arrange
-        doNothing().when(accountService).deleteAccountInfo(any());
+        doNothing().when(accountService.deleteAccountInfo(any()));
 
         // Act & Assert
         mockMvc.perform(delete("/api/v1/accountinfo")
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))
                 .content(objectMapper.writeValueAsString(accountInfo))
                 .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(accountService, times(1)).deleteAccountInfo(any());
     }
@@ -270,9 +269,6 @@ class AccountControllerTest {
     @Test
     @DisplayName("DELETE accountinfo - unauthorized")
     void deleteAccountInfoUnauthorized() throws Exception {
-        // Arrange
-        doNothing().when(accountService).deleteAccountInfo(any());
-
         // Act & Assert
         mockMvc.perform(delete("/api/v1/accountinfo")
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))

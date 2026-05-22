@@ -3,6 +3,7 @@ package be.crismartens.financetracker.unittesting.controller;
 import be.crismartens.financetracker.InvalidUserException;
 import be.crismartens.financetracker.UsernameAlreadyInUseExcepion;
 import be.crismartens.financetracker.auth.MyUserDetailsService;
+import be.crismartens.financetracker.dto.AppUserDTO;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.response.UserResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,17 +65,14 @@ class UserControllerTest {
     @DisplayName("Register User Test - Success")
     void registerUser() throws Exception {
         // Arrange
-        ResponseEntity<UserResponse> response = ResponseEntity.ok(
-                new UserResponse("New User saved: ","test@example.com"));
-
-        when(userDetailsService.registerUser(any())).thenReturn(response);
+        when(userDetailsService.registerUser(any())).thenReturn(new AppUserDTO(user));
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/register")
         .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(user))
                 .with(csrf()))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.username").value("test@example.com"));
 
         verify(userDetailsService, times(1)).registerUser(any());
@@ -105,11 +103,11 @@ class UserControllerTest {
     @DisplayName("Register User Test - Invalid username and/or password")
     void registerUserBadRequest() throws Exception {
         // Arrange
-        doThrow(InvalidUserException.class).when(userDetailsService).registerUser(any());
-
         AppUser invalidUser = new AppUser();
         invalidUser.setUsername("invalid");
         invalidUser.setPassword("weak!");
+
+        doThrow(InvalidUserException.class).when(userDetailsService).registerUser(any());
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/register")
@@ -134,7 +132,7 @@ class UserControllerTest {
         mockMvc.perform(post("/api/v1/delete")
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(userDetailsService, times(1)).deleteUser(any());
     }

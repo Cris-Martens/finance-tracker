@@ -1,6 +1,8 @@
 package be.crismartens.financetracker.auth;
 
 import be.crismartens.financetracker.InvalidUserException;
+import be.crismartens.financetracker.UsernameAlreadyInUseExcepion;
+import be.crismartens.financetracker.dto.AppUserDTO;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.UserRepository;
 import be.crismartens.financetracker.response.UserResponse;
@@ -56,14 +58,14 @@ public class MyUserDetailsService implements UserDetailsService {
         }
     }
 
-    public ResponseEntity<UserResponse> registerUser(AppUser user) {
+    public AppUserDTO registerUser(AppUser user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            throw new UsernameAlreadyInUseExcepion(user.getUsername());
         }
         if (!userValidationService.isValid(user)) {
-            throw new InvalidUserException("Invalid email or weak password");
+            throw new InvalidUserException();
         }
-        var appUser = new AppUser();
+        AppUser appUser = new AppUser();
         PasswordEncoder encoder = new BCryptPasswordEncoder();
 
         appUser.setUsername(user.getUsername());
@@ -71,6 +73,6 @@ public class MyUserDetailsService implements UserDetailsService {
 
         userRepository.save(appUser);
 
-        return ResponseEntity.ok(new UserResponse("New User saved: ", appUser.getUsername()));
+        return new AppUserDTO(appUser);
     }
 }

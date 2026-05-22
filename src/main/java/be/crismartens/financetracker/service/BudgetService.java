@@ -2,7 +2,9 @@ package be.crismartens.financetracker.service;
 
 import be.crismartens.financetracker.CategoryBudgetNotFoundException;
 import be.crismartens.financetracker.CategoryNotFoundException;
+import be.crismartens.financetracker.dto.CategoryBudgetDTO;
 import be.crismartens.financetracker.model.AppUser;
+import be.crismartens.financetracker.model.BudgetRequestBody;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.CategoryBudget;
 import be.crismartens.financetracker.repository.BudgetRepository;
@@ -35,73 +37,73 @@ public class BudgetService {
     }
 
     @Transactional
-    public void saveBudgets(UserDetails principal, Map<String, Double> budgets) {
+    public CategoryBudgetDTO saveBudgets(UserDetails principal, BudgetRequestBody budgets) {
         // Look up user
         AppUser user = userRepository.findByUsername(principal.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
-        // Iterate over request budgets
-        for (String key : budgets.keySet()) {
+        CategoryBudget budget = new CategoryBudget();
 
-            // Check budget is valid
-            if (budgets.get(key) < 0) {
-                throw new IllegalArgumentException("Budgets cannot be negative");
-            }
 
-            CategoryBudget budget = new CategoryBudget();
-
-            // Verify request category exists
-            Category category = categoryRepository.findByName(key)
-                    .orElseThrow(() -> new CategoryNotFoundException("category not found"));
-
-            budget.setCategory(category);
-            budget.setAmount(budgets.get(key));
-            budget.setAppUser(user);
-
-            budgetRepository.save(budget);
+        // Check budget is valid
+        if (budgets.getAmount() < 0) {
+            throw new IllegalArgumentException("Budgets cannot be negative");
         }
+
+        // Verify request category exists
+        Category category = categoryRepository.findByName(budgets.getCategoryName())
+                .orElseThrow(() -> new CategoryNotFoundException("category not found"));
+
+        budget.setCategory(category);
+        budget.setAmount(budgets.getAmount());
+        budget.setAppUser(user);
+
+        budgetRepository.save(budget);
+
+        return new CategoryBudgetDTO(budget);
     }
 
-    public Map<String, Double> getAllBudgets(UserDetails principal) {
+    public List<CategoryBudgetDTO> getAllBudgets(UserDetails principal) {
 
         Long userId = findAppUserId(principal);
 
         List<CategoryBudget> budgets = budgetRepository.getCategoryBudgetByAppUser_Id(userId);
 
-        Map<String, Double> budgetsMap = new LinkedHashMap<>();
-        for  (CategoryBudget budget : budgets) {
-            budgetsMap.put(budget.getCategory().getName(), budget.getAmount());
+        List<CategoryBudgetDTO> budgetDTOs = new ArrayList<>();
+
+        for (CategoryBudget budget : budgets) {
+            budgetDTOs.add(new CategoryBudgetDTO(budget));
         }
 
-        return budgetsMap;
+        return budgetDTOs;
     }
 
-    public void updateBudgets(UserDetails principal, Map<String, Double> budgets) {
+    public CategoryBudgetDTO updateBudgets(UserDetails principal, BudgetRequestBody budgets) {
         Long userId = findAppUserId(principal);
 
-        if (budgets.isEmpty()) {
+        if (budgets == null) {
             throw new IllegalArgumentException("Budgets cannot be empty");
         }
 
-        for (String key : budgets.keySet()) {
-            if (budgets.get(key) == null || budgets.get(key) < 0) {
-                throw new IllegalArgumentException("Budgets cannot be negative");
-            }
-
-            Long categoryId = categoryRepository.findIdByName(key);
-            if (categoryId == null) {
-                throw new CategoryNotFoundException("category not found");
-            }
-
-            CategoryBudget budget = budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(userId, categoryId);
-            if (budget == null) {
-                throw new CategoryBudgetNotFoundException("budget not found");
-            }
-
-            budget.setAmount(budgets.get(key));
-
-            budgetRepository.save(budget);
+        if (budgets.getAmount() == null || budgets.getAmount() < 0) {
+            throw new IllegalArgumentException("Budgets cannot be negative");
         }
+
+        Long categoryId = categoryRepository.findIdByName(budgets.getCategoryName());
+        if (categoryId == null) {
+            throw new CategoryNotFoundException("category not found");
+        }
+
+        CategoryBudget budget = budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(userId, categoryId);
+        if (budget == null) {
+            throw new CategoryBudgetNotFoundException("budget not found");
+        }
+
+        budget.setAmount(budgets.getAmount());
+
+        budgetRepository.save(budget);
+
+        return new CategoryBudgetDTO(budget);
     }
 
     public void deleteBudgets(UserDetails principal, String category) {

@@ -1,12 +1,19 @@
 package be.crismartens.financetracker.controller;
 
+import be.crismartens.financetracker.AccountInfoNotFoundException;
 import be.crismartens.financetracker.model.AccountInfo;
 import be.crismartens.financetracker.dto.AccountInfoDTO;
 import be.crismartens.financetracker.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.web.exchanges.HttpExchange;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+
+import javax.security.auth.login.AccountNotFoundException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -19,24 +26,25 @@ public class AccountController {
     }
 
     @PostMapping("/accountinfo")
-    public void addAccountInfo(@RequestBody AccountInfo accountInfo,
-                           @AuthenticationPrincipal UserDetails principal) {
-        accountService.upsertAccountInfo(accountInfo, principal);
+    public ResponseEntity<AccountInfoDTO> addAccountInfo(@RequestBody AccountInfo accountInfo,
+                                                                @AuthenticationPrincipal UserDetails principal) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                        .body(accountService.addAccountInfo(accountInfo, principal));
     }
 
     @GetMapping("/accountinfo")
-    public AccountInfoDTO getAccountInfo(@AuthenticationPrincipal UserDetails principal) {
-        return accountService.getAccountInfo(principal);
+    public ResponseEntity<AccountInfoDTO> getAccountInfo(@AuthenticationPrincipal UserDetails principal) {
+        return ResponseEntity.status(HttpStatus.OK).body(accountService.getAccountInfo(principal));
     }
 
     @PutMapping("/accountinfo")
-    public void updateAccountInfo(@RequestBody AccountInfo accountInfo,
-                              @AuthenticationPrincipal UserDetails principal) {
-        accountService.upsertAccountInfo(accountInfo, principal);
+    public ResponseEntity<AccountInfoDTO> updateAccountInfo(@RequestBody AccountInfo accountInfo,
+                                                                   @AuthenticationPrincipal UserDetails principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.updateAccountInfo(accountInfo, principal));
     }
 
     @DeleteMapping("/accountinfo")
-    public void deleteAccountInfo(@AuthenticationPrincipal UserDetails principal) {
-        accountService.deleteAccountInfo(principal);
+    public ResponseEntity<AccountInfoDTO> deleteAccountInfo(@AuthenticationPrincipal UserDetails principal) {
+        return  ResponseEntity.status(HttpStatus.OK).body(accountService.deleteAccountInfo(principal));
     }
 }

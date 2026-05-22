@@ -56,19 +56,17 @@ public class ExpensesService {
 
     public ExpenseDTO getExpenseById(long id, UserDetails user) throws UsernameNotFoundException, ExpenseNotFoundException {
         // check if user exists
-        Optional<Long> userId = userRepository.findIdByUsername(user.getUsername());
-        if (userId.isEmpty()) {
-            throw new UsernameNotFoundException("User: " + user.getUsername() + " not found");
-        }
+        Long userId = userRepository.findIdByUsername(user.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException(user.getUsername()));
 
         // check if expense exists
         Optional<Expense> expense = expensesRepository.findById(id);
         if (expense.isEmpty()) {
-            throw new ExpenseNotFoundException("Expense with id " + id+ " not found" );
+            throw new ExpenseNotFoundException(userId);
         }
 
         // check if user owns expense
-        if (!userId.get().equals(expense.get().getAppUser().getId())) {
+        if (!userId.equals(expense.get().getAppUser().getId())) {
             throw new UnauthorisedAccessException("Unauthorised");
         }
 
@@ -76,7 +74,7 @@ public class ExpensesService {
         return new ExpenseDTO(expense.get());
     }
 
-    public void addExpense(Expense expense, UserDetails principal) {
+    public ExpenseDTO addExpense(Expense expense, UserDetails principal) {
         // check if user exists
         AppUser user = userRepository.findByUsername(principal.getUsername())
                         .orElseThrow(() -> new UsernameNotFoundException("user not found"));
@@ -90,17 +88,19 @@ public class ExpensesService {
         expense.setCategory(category);
 
         expensesRepository.save(expense);
+
+        return new ExpenseDTO(expense);
     }
 
     @Transactional
-    public void updateExpense(Expense expense, UserDetails principal) throws ExpenseNotFoundException, UsernameNotFoundException {
+    public ExpenseDTO updateExpense(Expense expense, UserDetails principal) throws ExpenseNotFoundException, UsernameNotFoundException {
         // Check User
         Long userId = userRepository.findIdByUsername(principal.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
         // check if Expense exists
         Expense updateExpense = expensesRepository.findById(expense.getId())
-                .orElseThrow(() -> new ExpenseNotFoundException("Expense with id " + expense.getId() + " not found"));
+                .orElseThrow(() -> new ExpenseNotFoundException(expense.getId()));
 
         // Check if new category exists then overwrite based on id
         if (expense.getCategory() != null) {
@@ -125,6 +125,8 @@ public class ExpensesService {
         }
 
         expensesRepository.save(updateExpense);
+
+        return new ExpenseDTO(updateExpense);
     }
 
     public void deleteExpense(Expense expense, UserDetails principal) {
@@ -134,7 +136,7 @@ public class ExpensesService {
 
         // check if expense exists
         Expense deleteExpense = expensesRepository.findById(expense.getId())
-                .orElseThrow(() -> new ExpenseNotFoundException("Expense with id " + expense.getId() + " not found"));
+                .orElseThrow(() -> new ExpenseNotFoundException(expense.getId()));
 
         // check if user owns expense
         if (!userId.equals(deleteExpense.getAppUser().getId())) {

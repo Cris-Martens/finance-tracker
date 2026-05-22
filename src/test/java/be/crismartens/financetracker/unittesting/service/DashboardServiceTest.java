@@ -50,7 +50,6 @@ class DashboardServiceTest {
     // Objects for tests
     private AppUser user;
     private UserDetails principal1;
-    private UserDetails principal2;
 
     private Expense expense1;
     private Expense expense2;
@@ -88,23 +87,6 @@ class DashboardServiceTest {
             @Override
             public String getUsername() {
                 return "test@example.com";
-            }
-        };
-
-        principal2 = new UserDetails() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return List.of(new SimpleGrantedAuthority("ROLE_User"));
-            }
-
-            @Override
-            public @Nullable String getPassword() {
-                return "";
-            }
-
-            @Override
-            public @Nullable String getUsername() {
-                return "nonexistent@example.com";
             }
         };
 
@@ -379,7 +361,7 @@ class DashboardServiceTest {
     public void getSavedAmountNoExpenses() throws ExecutionException, InterruptedException {
         // Arrange
         when(userRepository.findIdByUsername(any())).thenReturn(Optional.of(1L));
-        when(accountRepository.findMonthlyIncomeByAppUser_Id(1L)).thenReturn(2400.0);
+        when(accountRepository.findMonthlyIncomeByAppUser_Id(1L)).thenReturn(account.getMonthlyIncome());
         when(expensesRepository.getSumExpensesByAppUser_IdAndMonth(eq(1L), any(), any())).thenReturn(0.0);
 
         // Act

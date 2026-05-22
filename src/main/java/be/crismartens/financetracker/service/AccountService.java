@@ -1,7 +1,9 @@
 package be.crismartens.financetracker.service;
 
+import be.crismartens.financetracker.AccountInfoNotFoundException;
 import be.crismartens.financetracker.model.AccountInfo;
 import be.crismartens.financetracker.dto.AccountInfoDTO;
+import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.AccountRepository;
 import be.crismartens.financetracker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,31 +30,40 @@ public class AccountService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    public void upsertAccountInfo(AccountInfo accountInfo, UserDetails principal) {
+    public AccountInfoDTO updateAccountInfo(AccountInfo accountInfo, UserDetails principal) {
         Long userId = findAppUserId(principal);
 
         Optional<AccountInfo> updatingAccountInfo = accountRepository.findByAppUser_Id(userId);
 
-        if (updatingAccountInfo.isPresent()) {
-            if (accountInfo.getFirstName() != null) {
-                updatingAccountInfo.get().setFirstName(accountInfo.getFirstName());
-            }
-            if (accountInfo.getLastName() != null) {
-                updatingAccountInfo.get().setLastName(accountInfo.getLastName());
-            }
-            if (accountInfo.getCountry() != null) {
-                updatingAccountInfo.get().setCountry(accountInfo.getCountry());
-            }
-            if (accountInfo.getMonthlyIncome() != null) {
-                updatingAccountInfo.get().setMonthlyIncome(accountInfo.getMonthlyIncome());
-            }
-
-            accountRepository.save(updatingAccountInfo.get());
-        } else {
-            accountInfo.setAppUser(userRepository.findById(userId).get());
-
-            accountRepository.save(accountInfo);
+        if (updatingAccountInfo.isEmpty()) {
+            throw new AccountInfoNotFoundException(userId);
         }
+
+        if (accountInfo.getFirstName() != null) {
+            updatingAccountInfo.get().setFirstName(accountInfo.getFirstName());
+        }
+        if (accountInfo.getLastName() != null) {
+            updatingAccountInfo.get().setLastName(accountInfo.getLastName());
+        }
+        if (accountInfo.getCountry() != null) {
+            updatingAccountInfo.get().setCountry(accountInfo.getCountry());
+        }
+        if (accountInfo.getMonthlyIncome() != null) {
+            updatingAccountInfo.get().setMonthlyIncome(accountInfo.getMonthlyIncome());
+        }
+
+        accountRepository.save(updatingAccountInfo.get());
+
+        return new AccountInfoDTO(updatingAccountInfo.get());
+    }
+
+    public AccountInfoDTO addAccountInfo(AccountInfo accountInfo, UserDetails principal) {
+        AppUser user = userRepository.findByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+
+        accountInfo.setAppUser(user);
+
+        return new AccountInfoDTO(accountInfo);
     }
 
     public AccountInfoDTO getAccountInfo(UserDetails principal) {
@@ -60,20 +71,17 @@ public class AccountService {
 
         Optional<AccountInfo> accountInfo = accountRepository.findByAppUser_Id(userId);
 
-        if (accountInfo.isPresent()) {
-            return new AccountInfoDTO(accountInfo.get());
-        } else {
-            return new AccountInfoDTO();
-        }
+        return accountInfo.map(AccountInfoDTO::new).orElseGet(AccountInfoDTO::new);
     }
 
-    public void deleteAccountInfo(UserDetails principal) {
+    public AccountInfoDTO deleteAccountInfo(UserDetails principal) {
         Long userId = findAppUserId(principal);
 
-        Optional<AccountInfo> accountInfo = accountRepository.findByAppUser_Id(userId);
+        AccountInfo accountInfo = accountRepository.findByAppUser_Id(userId)
+                .orElseThrow(() -> new AccountInfoNotFoundException(userId));
 
-        if (accountInfo.isPresent()) {
-            accountRepository.delete(accountInfo.get());
-        }
+        accountRepository.delete(accountInfo);
+
+        return new AccountInfoDTO(accountInfo);
     }
 }

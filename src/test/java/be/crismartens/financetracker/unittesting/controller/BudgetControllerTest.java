@@ -1,6 +1,11 @@
 package be.crismartens.financetracker.unittesting.controller;
 
 import be.crismartens.financetracker.NullValueException;
+import be.crismartens.financetracker.dto.CategoryBudgetDTO;
+import be.crismartens.financetracker.model.AppUser;
+import be.crismartens.financetracker.model.BudgetRequestBody;
+import be.crismartens.financetracker.model.Category;
+import be.crismartens.financetracker.model.CategoryBudget;
 import be.crismartens.financetracker.service.BudgetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,8 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -41,11 +45,12 @@ class BudgetControllerTest {
     private MockMvc mockMvc;
 
     // Initiate needed objects
-    Map<String, Double> oneBudget = new LinkedHashMap<>();
+    BudgetRequestBody oneBudget;
+    BudgetRequestBody nullBudget;
 
-    Map<String, Double> budgetList = new LinkedHashMap<>();
+    List<CategoryBudget> categoryBudgets;
 
-    Map<String, Double> nullBudget = new LinkedHashMap<>();
+    AppUser user;
 
     @BeforeEach
     void setUp() {
@@ -55,13 +60,16 @@ class BudgetControllerTest {
                     .webAppContextSetup(context)
                     .build();
 
-        oneBudget.put("Housing", 850.0);
+        user = new AppUser("test@example.com", "ValidPass123!", "ROLE_USER");
 
-        budgetList.put("Housing", 850.0);
-        budgetList.put("Utilities", 200.0);
-        budgetList.put("Groceries", 400.0);
+        oneBudget = new BudgetRequestBody("Housing", 850.0);
+        nullBudget = new BudgetRequestBody("Housing", null);
 
-        nullBudget.put("Housing", null);
+        categoryBudgets = new ArrayList<>();
+        categoryBudgets.add(new CategoryBudget(850.0, new Category("Housing"), user));
+        categoryBudgets.add(new CategoryBudget(200.0, new Category("Utilities"), user));
+        categoryBudgets.add(new CategoryBudget(400.0, new Category("Groceries"), user));
+
     }
 
     // ------ Insert Budgets Tests ------
@@ -71,31 +79,15 @@ class BudgetControllerTest {
     @DisplayName("Insert one budget - Success")
     void insertBudgetSuccess() throws Exception {
         // Arrange
-        doNothing().when(budgetService).saveBudgets(any(), any());
+        CategoryBudget budget = categoryBudgets.get(0);
+        when(budgetService.saveBudgets(any(), any())).thenReturn(new CategoryBudgetDTO(budget));
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/budget")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(oneBudget))
                 .with(csrf()))
-                .andExpect(status().isOk());
-
-        verify(budgetService, times(1)).saveBudgets(any(), any());
-    }
-
-    @Test
-    @WithMockUser
-    @DisplayName("Insert multiple budgets - Success")
-    void insertMultipleBudgetSuccess() throws Exception {
-        // Arrange
-        doNothing().when(budgetService).saveBudgets(any(), any());
-
-        // Act & Assert
-        mockMvc.perform(post("/api/v1/budget")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(budgetList))
-                .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         verify(budgetService, times(1)).saveBudgets(any(), any());
     }
@@ -105,7 +97,7 @@ class BudgetControllerTest {
     @DisplayName("Insert Budgets - Handle Null Values")
     void handleNullValues() throws Exception {
         // Arrange
-        doThrow(new NullValueException("Unable to insert Null value"))
+        doThrow(new NullValueException())
                 .when(budgetService).saveBudgets(any(), any());
 
         // Act & Assert
@@ -120,10 +112,13 @@ class BudgetControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Insert Budgets - Empty List")
+    @DisplayName("Insert Budget - Empty")
     void handleEmptyList() throws Exception {
         // Arrange
-        doNothing().when(budgetService).saveBudgets(any(), any());
+        CategoryBudgetDTO budget = null;
+
+        when(budgetService.saveBudgets(any(), any()))
+                .thenReturn(budget);
 
         Map<String, Double> emptyBudget = new LinkedHashMap<>();
 
@@ -138,12 +133,12 @@ class BudgetControllerTest {
     }
 
     @Test
-    @DisplayName("Insert Budgets - Unauthorized")
+    @DisplayName("Insert Budget - Unauthorized")
     void handleNonexistentUser() throws Exception {
         // Act & Assert
         mockMvc.perform(post("/api/v1/budget")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(budgetList))
+                .content(objectMapper.writeValueAsString(oneBudget))
                 .with(csrf()))
                 .andExpect(status().isUnauthorized());
 
@@ -157,7 +152,11 @@ class BudgetControllerTest {
     @DisplayName("Get Budgets - Success")
     void getBudgetSuccess() throws Exception {
         // arrange
-        when(budgetService.getAllBudgets(any())).thenReturn(budgetList);
+        List<CategoryBudgetDTO> budgets = new ArrayList<>();
+        for (CategoryBudget budget : categoryBudgets) {
+            budgets.add(new CategoryBudgetDTO(budget));
+        }
+        when(budgetService.getAllBudgets(any())).thenReturn(budgets);
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/budget")
@@ -175,7 +174,7 @@ class BudgetControllerTest {
     @DisplayName("Get Budgets - Empty List")
     void getBudgetEmptyList() throws Exception {
         // Arrange
-        Map<String, Double> emptyBudget = new LinkedHashMap<>();
+        List<CategoryBudgetDTO> emptyBudget = new ArrayList<>();
 
         when(budgetService.getAllBudgets(any())).thenReturn(emptyBudget);
 
@@ -205,12 +204,15 @@ class BudgetControllerTest {
     @DisplayName("Update Budget - Success")
     void updateBudgetSuccess() throws Exception {
         // Arrange
-        doNothing().when(budgetService).updateBudgets(any(), any());
+        CategoryBudgetDTO budget = new CategoryBudgetDTO(categoryBudgets.get(0));
+
+        when(budgetService.updateBudgets(any(), any()))
+                .thenReturn(budget);
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/budget")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(budgetList))
+                .content(objectMapper.writeValueAsString(oneBudget))
                 .with(csrf()))
                 .andExpect(status().isOk());
 
@@ -222,7 +224,10 @@ class BudgetControllerTest {
     @DisplayName("Update Budget - Empty List")
     void updateBudgetEmptyList() throws Exception {
         // Arrange
-        doNothing().when(budgetService).updateBudgets(any(), any());
+        CategoryBudgetDTO budget = null;
+
+        when(budgetService.updateBudgets(any(), any()))
+                .thenReturn(budget);
 
         Map<String, Double> emptyBudget = new LinkedHashMap<>();
 
@@ -231,7 +236,7 @@ class BudgetControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(emptyBudget))
                 .with(csrf()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
 
         verify(budgetService, times(1)).updateBudgets(any(), any());
     }
@@ -241,7 +246,7 @@ class BudgetControllerTest {
     @DisplayName("Update Budget - With Null Values")
     void updateBudgetWithNullValues() throws Exception {
         // Arrange
-        doNothing().when(budgetService).updateBudgets(any(), any());
+        doThrow(NullValueException.class).when(budgetService).updateBudgets(any(), any());
 
         // Act & Assert
         mockMvc.perform(put("/api/v1/budget")
@@ -259,7 +264,7 @@ class BudgetControllerTest {
         // Act & Assert
         mockMvc.perform(put("/api/v1/budget")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(budgetList))
+                .content(objectMapper.writeValueAsString(oneBudget))
                 .with(csrf()))
                 .andExpect(status().isUnauthorized());
 
@@ -280,7 +285,7 @@ class BudgetControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString("existent"))
                 .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(budgetService, times(1)).deleteBudgets(any(), any());
     }

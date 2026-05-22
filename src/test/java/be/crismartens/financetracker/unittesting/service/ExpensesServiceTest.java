@@ -451,7 +451,7 @@ class ExpensesServiceTest {
         // Act & Assert
         assertThrows(UsernameNotFoundException.class, () -> expensesService.deleteExpense(expense1, principal2));
         verify(userRepository, times(1)).findIdByUsername("nonexistent");
-        verify(expensesRepository, never()).delete(any(Expense.class));;
+        verify(expensesRepository, never()).delete(any(Expense.class));
     }
 
     @Test

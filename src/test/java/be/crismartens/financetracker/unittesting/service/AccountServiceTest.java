@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -101,7 +100,7 @@ class AccountServiceTest {
         newAccountInfo.setMonthlyIncome(2400.00);
 
         // Act
-        accountService.upsertAccountInfo(newAccountInfo, userDetails);
+        accountService.updateAccountInfo(newAccountInfo, userDetails);
 
         // Asser
         verify(accountRepository, times(1)).save(any(AccountInfo.class));
@@ -110,7 +109,7 @@ class AccountServiceTest {
 
     @Test
     void upsertAccountInfo_WhenAccountInfoExists_UpdatesFirstName() {
-        // Arrage
+        // Arrange
         when(userDetails.getUsername()).thenReturn("testUser");
         when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
         when(accountRepository.findByAppUser_Id(1L)).thenReturn(Optional.of(testAccountInfo));
@@ -119,7 +118,7 @@ class AccountServiceTest {
         updateInfo.setFirstName("Jane");
 
         // Act
-        accountService.upsertAccountInfo(updateInfo, userDetails);
+        accountService.updateAccountInfo(updateInfo, userDetails);
 
         // Assert
         assertEquals("Jane", testAccountInfo.getFirstName());
@@ -128,7 +127,7 @@ class AccountServiceTest {
 
     @Test
     void upsertAccountInfo_WhenAccountInfoExists_UpdatesLastName() {
-        // Arrage
+        // Arrange
         when(userDetails.getUsername()).thenReturn("testUser");
         when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
         when(accountRepository.findByAppUser_Id(1L)).thenReturn(Optional.of(testAccountInfo));
@@ -137,7 +136,7 @@ class AccountServiceTest {
         updateInfo.setLastName("Smith");
 
         // Act
-        accountService.upsertAccountInfo(updateInfo, userDetails);
+        accountService.updateAccountInfo(updateInfo, userDetails);
 
         // Assert
         assertEquals("Smith", testAccountInfo.getLastName());
@@ -161,7 +160,7 @@ class AccountServiceTest {
         // All null - should not change anything
 
         // Act
-        accountService.upsertAccountInfo(updateInfo, userDetails);
+        accountService.updateAccountInfo(updateInfo, userDetails);
 
         // Assert
         assertEquals(originalFristName, testAccountInfo.getFirstName());
@@ -177,7 +176,7 @@ class AccountServiceTest {
 
         // Act & Assert
         assertThrows(UsernameNotFoundException.class,
-                () -> accountService.upsertAccountInfo(testAccountInfo, userDetails));
+                () -> accountService.updateAccountInfo(testAccountInfo, userDetails));
     }
 
     // ============== getAccountInfo() Tests ==============
