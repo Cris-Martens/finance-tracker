@@ -1,6 +1,8 @@
 package be.crismartens.financetracker.service;
 
+import be.crismartens.financetracker.NoIncomeAddedException;
 import be.crismartens.financetracker.dto.BudgetAndSpendDTO;
+import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.CategoryBudget;
 import be.crismartens.financetracker.dto.ExpenseDTO;
 import be.crismartens.financetracker.repository.*;
@@ -8,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
@@ -33,13 +34,10 @@ public class DashboardService {
     }
 
     public List<ExpenseDTO> getLatestExpensesByAppUserId(UserDetails principal) {
-        Optional<Long> userId = userRepository.findIdByUsername(principal.getUsername());
-        if(userId.isPresent()) {
-            List<ExpenseDTO> expenses = expensesRepository
-                    .findTop5ByAppUser_IdOrderByExpenseDateDesc(userId.get());
-            return expenses;
-        }
-        return new ArrayList<>();
+        Long userId = userRepository.findIdByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException(principal.getUsername()));
+        return expensesRepository
+                .findTop5ByAppUser_IdOrderByExpenseDateDesc(userId);
     }
 
     public Map<String, Double> getUserExpensesByMonth(UserDetails principal) {
@@ -67,21 +65,30 @@ public class DashboardService {
             LocalDate start = thisMonth.atDay(1);
             LocalDate end = thisMonth.atEndOfMonth();
 
-            List<Object[]> rows = expensesRepository.findExpensesPerCategoryByAppUser_IdAndThisMonth(userId, start, end);
             List<BudgetAndSpendDTO> budgetAndSpendDTOs = new ArrayList<>();
-            for (Object[] row : rows) {
-                String categoryName = (String) row[0];
-                double budget = 0;
-                for(CategoryBudget categoryBudget : monthlyBudget) {
-                    if (categoryBudget.getCategory().getName().equals(categoryName)) {
-                        budget = categoryBudget.getAmount();
+
+            for  (CategoryBudget categoryBudget : monthlyBudget) {
+                String categoryName = categoryBudget.getCategory().getName();
+                double budget = categoryBudget.getAmount();
+                BudgetAndSpendDTO budgetAndSpendDTO = new BudgetAndSpendDTO(categoryName, budget, 0.0, budget);
+                budgetAndSpendDTOs.add(budgetAndSpendDTO);
+            }
+
+            List<Object[]> rows = expensesRepository.findExpensesPerCategoryByAppUser_IdAndThisMonth(userId, start, end);
+            for  (Object[] row : rows) {
+                Object categoryObj = row[0];
+                Category category = (Category) categoryObj;
+                String categoryName = category.getName();
+
+                for (BudgetAndSpendDTO budgetAndSpendDTO : budgetAndSpendDTOs) {
+                    if (categoryName.equals(budgetAndSpendDTO.getCategory())) {
+                        budgetAndSpendDTO.setSpend((double) row[1]);
+                        budgetAndSpendDTO.setRemaining(
+                                budgetAndSpendDTO.getBudget() -
+                                        budgetAndSpendDTO.getSpend()
+                        );
+                        break;
                     }
-                }
-                double spend = (double) row[1];
-                double remaining = budget - spend;
-                BudgetAndSpendDTO result = new BudgetAndSpendDTO(categoryName, budget, spend, remaining);
-                if (budget > 0) {
-                    budgetAndSpendDTOs.add(result);
                 }
             }
             BubbleSort.sort(budgetAndSpendDTOs);
@@ -105,7 +112,7 @@ public class DashboardService {
 
             return income - totalSpend;
         } else  {
-            return null;
+            throw new NoIncomeAddedException(userId);
         }
     }
 }

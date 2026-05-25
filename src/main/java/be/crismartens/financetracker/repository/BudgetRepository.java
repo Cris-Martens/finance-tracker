@@ -12,7 +12,7 @@ import java.util.List;
 public interface BudgetRepository extends CrudRepository<CategoryBudget, Long> {
 
     @Query("""
-            select b from CategoryBudget b join fetch b.category
+            select b from CategoryBudget b
                         where b.appUser.id = :userId
                                     order by b.id
             """)
