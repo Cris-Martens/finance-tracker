@@ -1,4 +1,4 @@
-package be.crismartens.financetracker;
+package be.crismartens.financetracker.exceptions;
 
 public class ExpenseNotFoundException extends RuntimeException {
     public ExpenseNotFoundException(Long id) {

@@ -1,4 +1,4 @@
-package be.crismartens.financetracker;
+package be.crismartens.financetracker.exceptions;
 
 public class NoIncomeAddedException extends RuntimeException {
     public NoIncomeAddedException(long userId) {
