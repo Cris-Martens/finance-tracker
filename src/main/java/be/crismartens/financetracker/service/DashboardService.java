@@ -1,6 +1,6 @@
 package be.crismartens.financetracker.service;
 
-import be.crismartens.financetracker.NoIncomeAddedException;
+import be.crismartens.financetracker.exceptions.NoIncomeAddedException;
 import be.crismartens.financetracker.dto.BudgetAndSpendDTO;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.CategoryBudget;
