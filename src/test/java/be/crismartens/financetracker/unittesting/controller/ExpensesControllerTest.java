@@ -1,12 +1,14 @@
 package be.crismartens.financetracker.unittesting.controller;
 
-import be.crismartens.financetracker.EmptyExpenseException;
-import be.crismartens.financetracker.ExpenseNotFoundException;
-import be.crismartens.financetracker.InvalidExpenseException;
+import be.crismartens.financetracker.exceptions.EmptyExpenseException;
+import be.crismartens.financetracker.exceptions.ExpenseNotFoundException;
+import be.crismartens.financetracker.exceptions.InvalidExpenseException;
 import be.crismartens.financetracker.dto.ExpenseDTO;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.Expense;
 import be.crismartens.financetracker.service.ExpensesService;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,13 +22,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -45,7 +47,6 @@ class ExpensesControllerTest {
     @MockitoBean
     private ExpensesService expensesService;
 
-
     private ObjectMapper objectMapper;
 
     private MockMvc mockMvc;
@@ -62,6 +63,8 @@ class ExpensesControllerTest {
                 .apply(springSecurity()).build();
 
         objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         expense1 = new Expense();
         expense1.setId(1L);
@@ -222,7 +225,7 @@ class ExpensesControllerTest {
         testExpense.setDescription("Electricity");
 
         doThrow(InvalidExpenseException.class)
-                .when(expensesService.addExpense(any(Expense.class), any()));
+                .when(expensesService).addExpense(any(Expense.class), any());
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/user/expenses")
