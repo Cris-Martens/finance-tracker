@@ -1,6 +1,6 @@
 package be.crismartens.financetracker.unittesting.controller;
 
-import be.crismartens.financetracker.NullValueException;
+import be.crismartens.financetracker.exceptions.NullValueException;
 import be.crismartens.financetracker.dto.CategoryBudgetDTO;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.model.BudgetRequestBody;
@@ -281,9 +281,8 @@ class BudgetControllerTest {
         doNothing().when(budgetService).deleteBudgets(any(), any());
 
         // Act & Assert
-        mockMvc.perform(delete("/api/v1/budget")
+        mockMvc.perform(delete("/api/v1/budget/existent")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString("existent"))
                 .with(csrf()))
                 .andExpect(status().isNoContent());
 
@@ -298,9 +297,8 @@ class BudgetControllerTest {
         doNothing().when(budgetService).deleteBudgets(any(), any());
 
         // Act & Assert
-        mockMvc.perform(delete("/api/v1/budget")
+        mockMvc.perform(delete("/api/v1/budget/nonexistent")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString("nonexistent"))
                 .with(csrf()))
                 .andExpect(status().isNotFound());
 
@@ -311,9 +309,8 @@ class BudgetControllerTest {
     @DisplayName("Delete Budget - Unauthorized")
     void deleteBudgetUnauthorized() throws Exception {
         // Act & Assert
-        mockMvc.perform(delete("/api/v1/budget")
+        mockMvc.perform(delete("/api/v1/budget/existent")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString("unauthorized"))
                 .with(csrf()))
                 .andExpect(status().isUnauthorized());
 
