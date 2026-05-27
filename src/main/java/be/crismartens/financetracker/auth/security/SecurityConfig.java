@@ -2,6 +2,7 @@ package be.crismartens.financetracker.auth.security;
 
 import be.crismartens.financetracker.auth.MyUserDetailsService;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,9 +47,28 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer::disable)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden")))
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/home", "/api/v1/register", "/register", "/auth/login", "/auth/**", "/login").permitAll()
-                        .requestMatchers("/api/v1/user/**", "/user/**", "/api/v1/budget").hasAuthority("ROLE_USER")
+                        .requestMatchers(
+                                "/", "/home",
+                                "/api/v1/register", "/register",
+                                "/auth/login", "/auth/**", "/login"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/api/v1/user/**",
+                                "/user/**",
+                                "/api/v1/budget/",
+                                "/api/v1/budget/**",
+                                "/budget",
+                                "/api/v1/dashboard/**",
+                                "/api/v1/accountinfo",
+                                "/api/v1/accountinfo/**",
+                                "/Api/v1/delete")
+                        .hasAuthority("ROLE_USER")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

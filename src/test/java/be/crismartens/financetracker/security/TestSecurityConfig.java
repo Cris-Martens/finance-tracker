@@ -2,6 +2,7 @@ package be.crismartens.financetracker.security;
 
 import be.crismartens.financetracker.auth.MyUserDetailsService;
 import be.crismartens.financetracker.auth.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -38,21 +40,38 @@ public class TestSecurityConfig {
 
     @Bean
     @Primary
-    SecurityFilterChain testSecurityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(CsrfConfigurer::disable)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden")))
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/home", "/api/v1/register", "/register",
-                                "/auth/login", "/auth/**", "/login")
-                                .permitAll()
-                        .requestMatchers("/api/v1/user/**", "/user/**", "/api/v1/budget")
-                        .hasAuthority("ROLE_USER")  // This will work with @WithMockUser
+                        .requestMatchers(
+                                "/", "/home",
+                                "/api/v1/register", "/register",
+                                "/auth/login", "/auth/**", "/login"
+                            ).permitAll()
+                        .requestMatchers(
+                                "/api/v1/user/**",
+                                        "/user/**",
+                                        "/api/v1/budget/",
+                                        "/api/v1/budget/**",
+                                        "/budget",
+                                        "/api/v1/dashboard/**",
+                                        "/api/v1/accountinfo",
+                                        "/api/v1/accountinfo/**",
+                                        "/Api/v1/delete")
+                                .hasAuthority("ROLE_USER")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
 
         return http.build();
     }
