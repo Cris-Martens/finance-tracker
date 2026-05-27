@@ -12,14 +12,12 @@ import java.time.Instant;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccountInfoNotFoundException.class)
-    public ResponseEntity<AppError> handleAccountInfoNotFoundException(AccountInfoNotFoundException ex) {
-        AppError error = new AppError(
-                Instant.now(),
-                404,
-                "User Info not found",
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    public ProblemDetail handleAccountInfoNotFoundException(AccountInfoNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+
+        problem.setTitle("Account not found");
+        problem.setDetail(ex.getMessage());
+        return problem;
     }
 
     @ExceptionHandler(CategoryBudgetNotFoundException.class)
