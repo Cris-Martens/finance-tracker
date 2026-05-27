@@ -1,19 +1,14 @@
 package be.crismartens.financetracker.controller;
 
-import be.crismartens.financetracker.AccountInfoNotFoundException;
 import be.crismartens.financetracker.model.AccountInfo;
 import be.crismartens.financetracker.dto.AccountInfoDTO;
 import be.crismartens.financetracker.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.web.exchanges.HttpExchange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-
-import javax.security.auth.login.AccountNotFoundException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -40,11 +35,12 @@ public class AccountController {
     @PutMapping("/accountinfo")
     public ResponseEntity<AccountInfoDTO> updateAccountInfo(@RequestBody AccountInfo accountInfo,
                                                                    @AuthenticationPrincipal UserDetails principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.updateAccountInfo(accountInfo, principal));
+        return ResponseEntity.status(HttpStatus.OK).body(accountService.updateAccountInfo(accountInfo, principal));
     }
 
     @DeleteMapping("/accountinfo")
-    public ResponseEntity<AccountInfoDTO> deleteAccountInfo(@AuthenticationPrincipal UserDetails principal) {
-        return  ResponseEntity.status(HttpStatus.OK).body(accountService.deleteAccountInfo(principal));
+    public ResponseEntity<Void> deleteAccountInfo(@AuthenticationPrincipal UserDetails principal) {
+        accountService.deleteAccountInfo(principal);
+        return  ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -1,6 +1,6 @@
 package be.crismartens.financetracker.service;
 
-import be.crismartens.financetracker.AccountInfoNotFoundException;
+import be.crismartens.financetracker.exceptions.AccountInfoNotFoundException;
 import be.crismartens.financetracker.model.AccountInfo;
 import be.crismartens.financetracker.dto.AccountInfoDTO;
 import be.crismartens.financetracker.model.AppUser;
@@ -74,14 +74,12 @@ public class AccountService {
         return accountInfo.map(AccountInfoDTO::new).orElseGet(AccountInfoDTO::new);
     }
 
-    public AccountInfoDTO deleteAccountInfo(UserDetails principal) {
+    public void deleteAccountInfo(UserDetails principal) {
         Long userId = findAppUserId(principal);
 
         AccountInfo accountInfo = accountRepository.findByAppUser_Id(userId)
                 .orElseThrow(() -> new AccountInfoNotFoundException(userId));
 
         accountRepository.delete(accountInfo);
-
-        return new AccountInfoDTO(accountInfo);
     }
 }
