@@ -47,6 +47,7 @@ class AccountControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(webContext)
+                .apply(springSecurity())
                 .apply(springSecurity()).build();
 
         objectMapper = new ObjectMapper();

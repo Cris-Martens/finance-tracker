@@ -60,7 +60,8 @@ class ExpensesControllerTest {
         // Build MockMvc with spring Security explicitly applied
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
-                .apply(springSecurity()).build();
+                .apply(springSecurity())
+                .build();
 
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());

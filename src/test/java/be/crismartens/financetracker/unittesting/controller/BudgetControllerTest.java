@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -60,6 +61,7 @@ class BudgetControllerTest {
 
         mockMvc = MockMvcBuilders
                     .webAppContextSetup(context)
+                    .apply(springSecurity())
                     .build();
 
         user = new AppUser("test@example.com", "ValidPass123!", "ROLE_USER");
