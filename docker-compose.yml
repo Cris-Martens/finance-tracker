@@ -34,10 +34,6 @@ services:
       SPRING_DATASOURCE_USERNAME: financeuser
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
 
-      # Your custom environment variables
-      FT_CRYPTO_PASSWORD: ${FT_CRYPTO_PASSWORD}
-      FT_CRYPTO_SALT: ${FT_CRYPTO_SALT}
-
       # Spring profiles
       SPRING_PROFILES_ACTIVE: docker
 
