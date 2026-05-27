@@ -1,7 +1,7 @@
 package be.crismartens.financetracker.service;
 
-import be.crismartens.financetracker.CategoryBudgetNotFoundException;
-import be.crismartens.financetracker.CategoryNotFoundException;
+import be.crismartens.financetracker.exceptions.CategoryBudgetNotFoundException;
+import be.crismartens.financetracker.exceptions.CategoryNotFoundException;
 import be.crismartens.financetracker.dto.CategoryBudgetDTO;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.model.BudgetRequestBody;
@@ -114,12 +114,12 @@ public class BudgetService {
         }
 
         Long categoryId = categoryRepository.findIdByName(category);
-        if (categoryId == null) {
-            throw new CategoryNotFoundException("category not found");
+        if (categoryId == null || categoryId < 1) {
+            throw new CategoryNotFoundException(category);
         }
         CategoryBudget budget = budgetRepository.getCategoryBudgetByAppUser_IdAndCategory_Id(userId, categoryId);
         if (budget == null) {
-            throw new CategoryBudgetNotFoundException("budget not found");
+            throw new CategoryBudgetNotFoundException(category);
         }
         budgetRepository.delete(budget);
     }

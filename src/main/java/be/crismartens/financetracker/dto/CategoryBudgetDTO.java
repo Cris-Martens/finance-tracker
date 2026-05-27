@@ -1,8 +1,11 @@
 package be.crismartens.financetracker.dto;
 
 import be.crismartens.financetracker.model.CategoryBudget;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
 
 public class CategoryBudgetDTO {
+    @JsonProperty(value = "category_name")
     private String categoryName;
     private double amount;
 

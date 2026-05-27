@@ -1,5 +1,6 @@
 package be.crismartens.financetracker.unittesting.controller;
 
+import be.crismartens.financetracker.exceptions.CategoryNotFoundException;
 import be.crismartens.financetracker.exceptions.NullValueException;
 import be.crismartens.financetracker.dto.CategoryBudgetDTO;
 import be.crismartens.financetracker.model.AppUser;
@@ -23,6 +24,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.*;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -127,7 +129,7 @@ class BudgetControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(emptyBudget))
                 .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         verify(budgetService, times(1)).saveBudgets(any(), any());
     }
@@ -162,9 +164,9 @@ class BudgetControllerTest {
         mockMvc.perform(get("/api/v1/budget")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.Housing").value(850.0))
-                .andExpect(jsonPath("$.Utilities").value(200.0))
-                .andExpect(jsonPath("$.Groceries").value(400.0));
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].category_name").value("Housing"))
+                .andExpect(jsonPath("$[0].amount").value(850.0));
 
         verify(budgetService, times(1)).getAllBudgets(any());
     }
@@ -294,7 +296,7 @@ class BudgetControllerTest {
     @DisplayName("Delete Budget - Budget Not Found")
     void deleteBudgetNotFound() throws Exception {
         // Arrange
-        doNothing().when(budgetService).deleteBudgets(any(), any());
+        doThrow(CategoryNotFoundException.class).when(budgetService).deleteBudgets(any(), any());
 
         // Act & Assert
         mockMvc.perform(delete("/api/v1/budget/nonexistent")
