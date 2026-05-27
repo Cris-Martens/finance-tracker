@@ -1,4 +1,4 @@
-package be.crismartens.financetracker;
+package be.crismartens.financetracker.exceptions;
 
 public class AccountInfoNotFoundException extends RuntimeException {
     public AccountInfoNotFoundException(Long id) {

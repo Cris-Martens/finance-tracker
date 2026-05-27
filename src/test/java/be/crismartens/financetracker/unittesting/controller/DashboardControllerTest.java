@@ -2,6 +2,7 @@ package be.crismartens.financetracker.unittesting.controller;
 
 import be.crismartens.financetracker.dto.BudgetAndSpendDTO;
 import be.crismartens.financetracker.dto.ExpenseDTO;
+import be.crismartens.financetracker.exceptions.NoIncomeAddedException;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.Expense;
 import be.crismartens.financetracker.service.DashboardService;
@@ -25,9 +26,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -52,6 +53,7 @@ class DashboardControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
+                .apply(springSecurity())
                 .build();
 
         expenseList = new ArrayList<>();
@@ -242,13 +244,12 @@ class DashboardControllerTest {
     @DisplayName("Get Total Saved Amount - Empty")
     void getTotalSavedAmountEmptyList() throws Exception {
         // Arrange
-        when(dashboardService.getSavedAmount(any())).thenReturn(null);
+        doThrow(NoIncomeAddedException.class).when(dashboardService).getSavedAmount((any()));
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/dashboard/totalsaved")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(nullValue()));
+                .andExpect(status().isNotFound());
 
         verify(dashboardService, times(1)).getSavedAmount((any()));
     }

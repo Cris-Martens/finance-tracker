@@ -15,11 +15,6 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
     open-in-view: false
 
-app:
-  crypto:
-    password: ${FT_CRYPTO_PASSWORD}
-
-
   security:
     oauth2:
       client:

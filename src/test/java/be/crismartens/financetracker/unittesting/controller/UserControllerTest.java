@@ -1,19 +1,16 @@
 package be.crismartens.financetracker.unittesting.controller;
 
-import be.crismartens.financetracker.InvalidUserException;
-import be.crismartens.financetracker.UsernameAlreadyInUseExcepion;
+import be.crismartens.financetracker.exceptions.InvalidUserException;
+import be.crismartens.financetracker.exceptions.UsernameAlreadyInUseExcepion;
 import be.crismartens.financetracker.auth.MyUserDetailsService;
 import be.crismartens.financetracker.dto.AppUserDTO;
 import be.crismartens.financetracker.model.AppUser;
-import be.crismartens.financetracker.response.UserResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -25,6 +22,8 @@ import tools.jackson.databind.ObjectMapper;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,6 +49,7 @@ class UserControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
+                .apply(springSecurity())
                 .build();
 
         objectMapper = new ObjectMapper();
@@ -119,7 +119,7 @@ class UserControllerTest {
         verify(userDetailsService, times(1)).registerUser(any());
     }
 
-    // ======= Register User Tests =======
+    // ======= Delete User Tests =======
 
     @Test
     @WithMockUser
@@ -129,7 +129,7 @@ class UserControllerTest {
         doNothing().when(userDetailsService).deleteUser(any());
 
         // Act & Assert
-        mockMvc.perform(post("/api/v1/delete")
+        mockMvc.perform(delete("/api/v1/delete")
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf()))
                 .andExpect(status().isNoContent());
@@ -141,7 +141,7 @@ class UserControllerTest {
     @DisplayName("Delete User - Unauthorized")
     void deleteUserUnauthorized() throws Exception {
         // Act & Arrange
-        mockMvc.perform(post("/api/v1/delete")
+        mockMvc.perform(delete("/api/v1/delete")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
 

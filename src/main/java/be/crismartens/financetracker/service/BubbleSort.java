@@ -10,7 +10,7 @@ public class BubbleSort {
 
         while (swapped) {
             swapped = false;
-            for (int i = 0; i < budgets.size() - 2; i++) {
+            for (int i = 0; i < budgets.size() - 1; i++) {
                 if (budgets.get(i + 1).getRemaining() <= budgets.get(i).getRemaining()) {
 
                     BudgetAndSpendDTO temp = budgets.get(i + 1);

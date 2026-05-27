@@ -1,6 +1,6 @@
 package be.crismartens.financetracker.unittesting.controller;
 
-import be.crismartens.financetracker.ExpenseNotFoundException;
+import be.crismartens.financetracker.exceptions.ExpenseNotFoundException;
 import be.crismartens.financetracker.dto.AccountInfoDTO;
 import be.crismartens.financetracker.model.AccountInfo;
 import be.crismartens.financetracker.service.AccountService;
@@ -18,9 +18,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.math.BigDecimal;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -50,6 +47,7 @@ class AccountControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(webContext)
+                .apply(springSecurity())
                 .apply(springSecurity()).build();
 
         objectMapper = new ObjectMapper();
@@ -75,8 +73,8 @@ class AccountControllerTest {
         mockMvc.perform(get("/api/v1/accountinfo")
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].first_name").value("testFirstName"));
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.first_name").value("testFirstName"));
 
         verify(accountService, times(1)).getAccountInfo(any());
     }
@@ -237,7 +235,7 @@ class AccountControllerTest {
     @DisplayName("DELETE accountinfo - success")
     void deleteAccountInfoSuccess() throws Exception {
         // Arrange
-        doNothing().when(accountService.deleteAccountInfo(any()));
+        doNothing().when(accountService).deleteAccountInfo(any());
 
         // Act & Assert
         mockMvc.perform(delete("/api/v1/accountinfo")

@@ -1,15 +1,12 @@
 package be.crismartens.financetracker.auth;
 
-import be.crismartens.financetracker.InvalidUserException;
-import be.crismartens.financetracker.UsernameAlreadyInUseExcepion;
+import be.crismartens.financetracker.exceptions.InvalidUserException;
+import be.crismartens.financetracker.exceptions.UsernameAlreadyInUseExcepion;
 import be.crismartens.financetracker.dto.AppUserDTO;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.UserRepository;
-import be.crismartens.financetracker.response.UserResponse;
 import be.crismartens.financetracker.service.UserValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -37,25 +34,22 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<AppUser> myUserOptional = userRepository.findByUsername(username);
-        if (myUserOptional.isPresent()) {
-            AppUser myUser = myUserOptional.get();
-            return User.builder()
-                    .username(myUser.getUsername())
-                    .password(myUser.getPassword())
-                    .authorities(myUser.getAuthority().split(","))
-                    .build();
-        } else {
-            throw new UsernameNotFoundException(username + "not found");
-        }
+        AppUser myUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+
+        return User.builder()
+                .username(myUser.getUsername())
+                .password(myUser.getPassword())
+                .authorities(myUser.getAuthority().split(","))
+                .build();
     }
 
     @Transactional
     public void deleteUser(UserDetails user) {
-        Optional<AppUser> myUserOptional = userRepository.findByUsername(user.getUsername());
-        if (myUserOptional.isPresent()) {
-            userRepository.delete(myUserOptional.get());
-        }
+        AppUser myUserOptional = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException(user.getUsername()));
+
+        userRepository.delete(myUserOptional);
     }
 
     public AppUserDTO registerUser(AppUser user) {

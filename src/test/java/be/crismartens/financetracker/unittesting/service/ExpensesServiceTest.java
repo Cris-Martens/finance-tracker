@@ -1,8 +1,8 @@
 package be.crismartens.financetracker.unittesting.service;
 
-import be.crismartens.financetracker.CategoryNotFoundException;
-import be.crismartens.financetracker.ExpenseNotFoundException;
-import be.crismartens.financetracker.UnauthorisedAccessException;
+import be.crismartens.financetracker.exceptions.CategoryNotFoundException;
+import be.crismartens.financetracker.exceptions.ExpenseNotFoundException;
+import be.crismartens.financetracker.exceptions.UnauthorisedAccessException;
 import be.crismartens.financetracker.dto.ExpenseDTO;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.model.Category;

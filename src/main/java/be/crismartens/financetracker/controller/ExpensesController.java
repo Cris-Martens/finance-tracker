@@ -51,6 +51,6 @@ public class ExpensesController {
             @RequestBody Expense expense,
             @AuthenticationPrincipal UserDetails principal) {
         expensesService.deleteExpense(expense, principal);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

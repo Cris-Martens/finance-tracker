@@ -1,8 +1,9 @@
 package be.crismartens.financetracker.unittesting.service;
 
-import be.crismartens.financetracker.InvalidUserException;
+import be.crismartens.financetracker.exceptions.InvalidUserException;
 import be.crismartens.financetracker.auth.MyUserDetailsService;
 import be.crismartens.financetracker.dto.AppUserDTO;
+import be.crismartens.financetracker.exceptions.UsernameAlreadyInUseExcepion;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.repository.UserRepository;
 import be.crismartens.financetracker.service.UserValidationService;
@@ -23,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -77,11 +79,8 @@ class MyUserDetailsServiceTest {
         // Arrange
         when(userRepository.findByUsername("example@test.com")).thenReturn(Optional.ofNullable(appUser));
 
-        // Act
-        AppUserDTO result = userDetailsService.registerUser(appUser);
-
-        // Assert
-        assertEquals(new AppUserDTO(appUser), result);
+        // Act & Assert
+        assertThrows(UsernameAlreadyInUseExcepion.class, () -> userDetailsService.registerUser(appUser));
         verify(userRepository, times(1)).findByUsername("example@test.com");
         verify(userRepository, never()).save(any());
 
@@ -127,7 +126,8 @@ class MyUserDetailsServiceTest {
         AppUserDTO result = userDetailsService.registerUser(newUser);
 
         // Assert
-        assertEquals(new AppUserDTO(newUser), result);
+        AppUserDTO expected = new AppUserDTO(newUser);
+        assertEquals(expected, result);
         verify(userRepository, times(1)).findByUsername("example@test.com");
         verify(userRepository, times(1)).save(any(AppUser.class));
     }
@@ -140,9 +140,9 @@ class MyUserDetailsServiceTest {
         when(userRepository.findByUsername("example@test.com")).thenReturn(Optional.empty());
 
         // Act
-        userDetailsService.deleteUser(userDetails);
 
         // Act & Assert
+        assertThrows(UsernameNotFoundException.class, () -> userDetailsService.deleteUser(userDetails));
         verify(userRepository, times(1)).findByUsername("example@test.com");
         verify(userRepository, never()).delete(any());
     }
@@ -167,10 +167,8 @@ class MyUserDetailsServiceTest {
 
         when(userRepository.findByUsername(null)).thenReturn(Optional.empty());
 
-        // Act
-        userDetailsService.deleteUser(newUserDetails);
-
-        // Assert
+        // Act & Assert
+        assertThrows(UsernameNotFoundException.class, () -> userDetailsService.deleteUser(newUserDetails));
         verify(userRepository, times(1)).findByUsername(null);
         verify(userRepository, never()).delete(any());
     }

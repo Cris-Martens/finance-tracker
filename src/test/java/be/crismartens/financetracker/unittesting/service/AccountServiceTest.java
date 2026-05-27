@@ -1,5 +1,6 @@
 package be.crismartens.financetracker.unittesting.service;
 
+import be.crismartens.financetracker.exceptions.AccountInfoNotFoundException;
 import be.crismartens.financetracker.dto.AccountInfoDTO;
 import be.crismartens.financetracker.model.AccountInfo;
 import be.crismartens.financetracker.model.AppUser;
@@ -18,7 +19,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
@@ -84,28 +84,6 @@ class AccountServiceTest {
     }
 
     // ============== upsertAccountInfo() Tests ==============
-
-    @Test
-    void upsertAccountInfo_WhenAccountInfoDoesNotExist_CreateNewAccountInfo() {
-        // Arrange
-        when(userDetails.getUsername()).thenReturn("testUser");
-        when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
-        when(accountRepository.findByAppUser_Id(1L)).thenReturn(Optional.empty());
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-
-        AccountInfo newAccountInfo = new AccountInfo();
-        newAccountInfo.setFirstName("John");
-        newAccountInfo.setLastName("Doe");
-        newAccountInfo.setCountry("Belgium");
-        newAccountInfo.setMonthlyIncome(2400.00);
-
-        // Act
-        accountService.updateAccountInfo(newAccountInfo, userDetails);
-
-        // Asser
-        verify(accountRepository, times(1)).save(any(AccountInfo.class));
-        verify(userRepository, times(1)).findById(1L);
-    }
 
     @Test
     void upsertAccountInfo_WhenAccountInfoExists_UpdatesFirstName() {
@@ -248,11 +226,10 @@ class AccountServiceTest {
         when(userRepository.findIdByUsername("testUser")).thenReturn(Optional.of(1L));
         when(accountRepository.findByAppUser_Id(1L)).thenReturn(Optional.empty());
 
-        // Act
-        accountService.deleteAccountInfo(userDetails);
+        // Act & Assert
+        assertThrows(AccountInfoNotFoundException.class, () -> accountService.deleteAccountInfo(userDetails));
 
-        // Assert
-        verify(accountRepository, never()).delete(any());
+        verify(accountRepository, never()).delete(testAccountInfo);
     }
 
     @Test

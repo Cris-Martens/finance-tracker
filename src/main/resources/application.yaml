@@ -32,9 +32,6 @@ spring:
             clientId: ${GITHUB_CLIENT_ID}
             clientSecret: ${GITHUB_CLIENT_SECRET}
 
-app:
-  crypto:
-    password: ${FT_CRYPTO_PASSWORD}
 
 rsa:
   private-key: classpath:keys/private.pem

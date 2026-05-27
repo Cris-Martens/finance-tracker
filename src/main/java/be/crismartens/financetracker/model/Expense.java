@@ -3,6 +3,7 @@ package be.crismartens.financetracker.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
+import tools.jackson.databind.MapperFeature;
 
 import java.time.LocalDate;
 import java.util.Objects;

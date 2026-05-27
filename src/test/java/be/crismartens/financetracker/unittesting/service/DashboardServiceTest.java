@@ -1,5 +1,6 @@
 package be.crismartens.financetracker.unittesting.service;
 
+import be.crismartens.financetracker.exceptions.NoIncomeAddedException;
 import be.crismartens.financetracker.dto.BudgetAndSpendDTO;
 import be.crismartens.financetracker.dto.ExpenseDTO;
 import be.crismartens.financetracker.model.*;
@@ -90,6 +91,10 @@ class DashboardServiceTest {
             }
         };
 
+        category1 = new Category(1L, "Housing");
+        category2 = new Category(2L, "Utilities");
+        category3 = new Category(3L, "Groceries");
+
         expense1 =
                 new Expense(LocalDate.parse("2026-05-12"), category1, 750.0, "");
         expense2 =
@@ -105,9 +110,6 @@ class DashboardServiceTest {
         budget2 = new CategoryBudget(200.0, category2, user);
         budget3 = new CategoryBudget(80.0, category3, user);
 
-        category1 = new Category(1L, "Housing");
-        category2 = new Category(2L, "Utilities");
-        category3 = new Category(3L, "Groceries");
 
         account =
                 new AccountInfo("John", "Doe", "Belgium", 2400.0, user);
@@ -289,8 +291,8 @@ class DashboardServiceTest {
         // Assert
         List<BudgetAndSpendDTO> expected = new ArrayList<>();
         expected.add(new BudgetAndSpendDTO("Groceries", 80.0, 0.0, 80.0));
-        expected.add(new BudgetAndSpendDTO("Utilities", 200.0, 180.0, 20.0));
-        expected.add(new BudgetAndSpendDTO("Housing", 750.0, 750.0, 0.0));
+        expected.add(new BudgetAndSpendDTO("Utilities", 200.0, 0.0, 200.0));
+        expected.add(new BudgetAndSpendDTO("Housing", 750.0, 0.0, 750.0));
 
 
         assertEquals(expected, result);
@@ -361,7 +363,7 @@ class DashboardServiceTest {
     public void getSavedAmountNoExpenses() throws ExecutionException, InterruptedException {
         // Arrange
         when(userRepository.findIdByUsername(any())).thenReturn(Optional.of(1L));
-        when(accountRepository.findMonthlyIncomeByAppUser_Id(1L)).thenReturn(account.getMonthlyIncome());
+        when(accountRepository.findMonthlyIncomeByAppUser_Id(1L)).thenReturn(2400.0);
         when(expensesRepository.getSumExpensesByAppUser_IdAndMonth(eq(1L), any(), any())).thenReturn(0.0);
 
         // Act
@@ -384,11 +386,8 @@ class DashboardServiceTest {
         when(userRepository.findIdByUsername(any())).thenReturn(Optional.of(1L));
         when(accountRepository.findMonthlyIncomeByAppUser_Id(1L)).thenReturn(null);
 
-        // Act
-        double result = dashboardService.getSavedAmount(principal1);
-
-        // Assert
-        assertNull(result);
+        // Act & Assert
+        assertThrows(NoIncomeAddedException.class, () -> dashboardService.getSavedAmount(principal1));
 
         verify(userRepository, times(1)).findIdByUsername(any());
         verify(accountRepository, times(1)).findMonthlyIncomeByAppUser_Id(1L);
