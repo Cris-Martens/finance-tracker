@@ -1,6 +1,6 @@
 package be.crismartens.financetracker.unittesting.service;
 
-import be.crismartens.financetracker.AccountInfoNotFoundException;
+import be.crismartens.financetracker.exceptions.AccountInfoNotFoundException;
 import be.crismartens.financetracker.dto.AccountInfoDTO;
 import be.crismartens.financetracker.model.AccountInfo;
 import be.crismartens.financetracker.model.AppUser;

@@ -1,7 +1,7 @@
 package be.crismartens.financetracker.unittesting.service;
 
-import be.crismartens.financetracker.CategoryBudgetNotFoundException;
-import be.crismartens.financetracker.CategoryNotFoundException;
+import be.crismartens.financetracker.exceptions.CategoryBudgetNotFoundException;
+import be.crismartens.financetracker.exceptions.CategoryNotFoundException;
 import be.crismartens.financetracker.dto.CategoryBudgetDTO;
 import be.crismartens.financetracker.model.AppUser;
 import be.crismartens.financetracker.model.BudgetRequestBody;
