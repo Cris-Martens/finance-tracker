@@ -2,7 +2,6 @@ package be.crismartens.financetracker.controller;
 
 import be.crismartens.financetracker.dto.AppUserDTO;
 import be.crismartens.financetracker.model.AppUser;
-import be.crismartens.financetracker.response.UserResponse;
 import be.crismartens.financetracker.auth.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
