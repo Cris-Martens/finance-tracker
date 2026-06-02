@@ -1,5 +1,5 @@
 # ---- Stage 1: Build ----
-FROM eclipse-temurin:25-jdk-alpine as builder
+FROM eclipse-temurin:25-jdk-alpine AS builder
 WORKDIR /build
 
 # Install Maven
