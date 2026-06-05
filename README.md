@@ -533,7 +533,13 @@ mvnw.cmd spring-boot:run
 
 # API Documentation
 
-TODO
+```bash
+http://localhost:8080/swagger-ui/index.html#/
+```
+OR
+```bash
+http://localhost:8080/swagger-ui.html
+```
 
 ---
 
