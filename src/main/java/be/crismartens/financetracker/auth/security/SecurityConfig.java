@@ -36,11 +36,6 @@ public class SecurityConfig {
         this.myUserDetailService = myUserDetailService;
     }
 
-    @PostConstruct
-    public void init() {
-        System.out.println("SecurityConfig leaded!");
-    }
-
     @Bean("FilterChain")
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -56,7 +51,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/", "/home",
                                 "/api/v1/register", "/register",
-                                "/api/v1/auth/login", "/api/v1/auth/**", "/login"
+                                "/api/v1/auth/login", "/api/v1/auth/**", "/login",
+                                "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/v1/user/**",
