@@ -3,30 +3,44 @@ package be.crismartens.financetracker.dto;
 import be.crismartens.financetracker.model.Category;
 import be.crismartens.financetracker.model.Expense;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 public class ExpenseDTO {
+    @Schema(
+            description = "Unique identifier long value",
+            example = "12345"
+    )
     private Long id;
     @JsonProperty("category")
+    @Schema(
+            description = "Category to which this expense falls under",
+            example = """
+                    {
+                        "id": "1",
+                        "name": "Housing"
+                    }
+                    """
+    )
     private Category category;
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        ExpenseDTO that = (ExpenseDTO) o;
-        return Double.compare(amount, that.amount) == 0 && Objects.equals(id, that.id) && Objects.equals(category, that.category) && Objects.equals(expenseDate, that.expenseDate) && Objects.equals(description, that.description);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, category, expenseDate, amount, description);
-    }
-
     @JsonProperty("expense_date")
+    @Schema(
+            description = "Date when the expense was made",
+            example = "2026-05-11"
+    )
     LocalDate expenseDate;
+    @Schema(
+            description = "Amount of the expense",
+            example = "750.00"
+    )
     private double amount;
+    @Schema(
+            description = "Optional additional information about the expense",
+            example = "Rent"
+    )
     private String description;
 
     public ExpenseDTO() {}
@@ -77,6 +91,18 @@ public class ExpenseDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ExpenseDTO that = (ExpenseDTO) o;
+        return Double.compare(amount, that.amount) == 0 && Objects.equals(id, that.id) && Objects.equals(category, that.category) && Objects.equals(expenseDate, that.expenseDate) && Objects.equals(description, that.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, category, expenseDate, amount, description);
     }
 }
 

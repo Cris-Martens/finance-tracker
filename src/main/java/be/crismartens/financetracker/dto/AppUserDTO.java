@@ -2,11 +2,16 @@ package be.crismartens.financetracker.dto;
 
 import be.crismartens.financetracker.model.AppUser;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Objects;
 
 public class AppUserDTO {
     @JsonProperty(value = "username")
+    @Schema(
+            description = "User email as username",
+            example = "johndoe@example.com"
+    )
     private String username;
 
     public AppUserDTO(AppUser appUser) {
