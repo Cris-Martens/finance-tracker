@@ -234,33 +234,33 @@ budget
 
 ### Authentication Routes
 
-| Method | Endpoint         | Description           |
-|---|------------------|-----------------------|
-| POST | `/api/v1/register` | Register user         |
-| POST | `/api/v1/auth/login` | Login user            |
-| GET | `/api/v1/delete` | Delete logged in user |
+| Method | Endpoint             | Description           |
+|--------|----------------------|-----------------------|
+| POST   | `/api/v1/register`   | Register user         |
+| POST   | `/api/v1/auth/login` | Login user            |
+| GET    | `/api/v1/delete`     | Delete logged in user |
 
 ---
 
 ### Expenses Routes
 
-| Method | Endpoint                | Description |
-|---|-------------------------|---|
-| POST | `/api/v1/expenses`      | Create transaction |
-| GET | `/api/v1/expenses`      | Get all transactions |
-| GET | `/api/v1/expenses/{id}` | Get transaction by ID |
-| PUT | `/api/v1/expenses/`     | Update transaction |
-| DELETE | `/api/v1/expenses/`     | Delete transaction |
+| Method | Endpoint                | Description           |
+|--------|-------------------------|-----------------------|
+| POST   | `/api/v1/expenses`      | Create transaction    |
+| GET    | `/api/v1/expenses`      | Get all transactions  |
+| GET    | `/api/v1/expenses/{id}` | Get transaction by ID |
+| PUT    | `/api/v1/expenses/`     | Update transaction    |
+| DELETE | `/api/v1/expenses/`     | Delete transaction    |
 
 ---
 
 ### Budget Routes
 
-| Method | Endpoint                    | Description |
-|---|-----------------------------|---|
-| POST | `/api/v1/budget`            | Create budget |
-| GET | `/api/v1/budget`            | Get budgets |
-| PUT | `/api/v1/budget`            | Update budget |
+| Method | Endpoint                    | Description   |
+|--------|-----------------------------|---------------|
+| POST   | `/api/v1/budget`            | Create budget |
+| GET    | `/api/v1/budget`            | Get budgets   |
+| PUT    | `/api/v1/budget`            | Update budget |
 | DELETE | `/api/v1/budget/{category}` | Delete budget |
 
 ---
@@ -268,10 +268,10 @@ budget
 ### Account info Routes
 
 | Method | Endpoint              | Description        |
-|---|-----------------------|--------------------|
-| POST | `/api/v1/accountinfo` | Create accountinfo |
-| GET | `/api/v1/accountinfo` | Get accountinfo    |
-| PUT | `/api/v1/accountinfo` | Update accountinfo |
+|--------|-----------------------|--------------------|
+| POST   | `/api/v1/accountinfo` | Create accountinfo |
+| GET    | `/api/v1/accountinfo` | Get accountinfo    |
+| PUT    | `/api/v1/accountinfo` | Update accountinfo |
 | DELETE | `/api/v1/accountinfo` | Delete accountinfo |
 
 ---
@@ -410,7 +410,7 @@ Testing includes:
 
 # Docker Support
 
-This project includes Docker support for running the backend API in a containerised environment.
+This project includes Docker support for running the backend API in a containerized environment.
 
 In this project it includes/
 - Custom Docker image for the Spring Boot Backend
@@ -488,7 +488,7 @@ cd /path-to-folder/finance-tracker
 ---
 
 ### 3. Install Requirements
-For MacOS
+For macOS
 ```bash
 brew install openjdk@25
 brew install maven
@@ -521,7 +521,7 @@ GITHUB_CLIENT_SECRET=your_github_client_secret
 ---
 
 ### 5. Start application
-For MacOS
+For macOS
 ```bash
 ./mvnw spring-boot:run
 ```
