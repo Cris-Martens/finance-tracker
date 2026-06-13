@@ -145,6 +145,7 @@ src/
 ├── main/
 │    ├── java/
 │    │    ├── auth/
+│    │    ├── configuration/
 │    │    ├── controller/
 │    │    ├── dto/
 │    │    ├── exceptions/
